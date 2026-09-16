@@ -1,0 +1,21 @@
+PACOTE — AGENDA DO INSPETOR + GOOGLE PLANILHAS + GOOGLE SITES
+
+ARQUIVOS
+- index.html: página principal pronta para hospedagem.
+- Codigo_Google_Apps_Script.gs: backend do Google Planilhas.
+- COMO_PUBLICAR_NO_GOOGLE_SITES.txt: instruções.
+
+PUBLICAÇÃO
+1. Publique o index.html em uma hospedagem HTTPS pública (por exemplo, GitHub Pages).
+2. No Google Sites, use Inserir > Incorporar > URL.
+3. Cole o endereço HTTPS da página publicada.
+
+GOOGLE APPS SCRIPT
+1. Use uma única cópia do Codigo_Google_Apps_Script.gs no projeto.
+2. Implante como Aplicativo da Web.
+3. Executar como: você.
+4. Quem tem acesso: qualquer pessoa.
+5. Use a URL que termina em /exec.
+6. No site, em Configurar conexão, cole essa URL.
+
+A planilha usa a aba "Atividades".
