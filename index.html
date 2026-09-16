@@ -1372,7 +1372,22 @@ function renderizar() {
   }
 
 }
+  
+<div class="navegacao">
+    <button class="btn-semana" onclick="semanaAnterior()">
+        ◀ Semana anterior
+    </button>
 
+    <button class="btn-hoje" onclick="irParaHoje()">
+        📅 Semana atual
+    </button>
+
+    <button class="btn-semana" onclick="proximaSemana()">
+        Próxima semana ▶
+    </button>
+</div>
+
+<div class="semana-info" id="semanaInfo"></div>
 
 // =====================================================
 // CARDS
