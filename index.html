@@ -691,7 +691,7 @@ button:disabled {
 
                   <select id="tecnico">
 
-                    <option value="">
+                    <option value="#">
                         Selecione...
                     </option>
 
@@ -763,7 +763,7 @@ button:disabled {
 
                 <select id="local">
 
-                    <option value="">
+                    <option value="#">
                         Selecione...
                     </option>
 
@@ -843,7 +843,7 @@ button:disabled {
 
                 <select id="prioridade">
 
-                    <option value="">
+                    <option value="#">
                         Selecione...
                     </option>
 
@@ -872,7 +872,7 @@ button:disabled {
 
                 <select id="status">
 
-                    <option value="">
+                    <option value="#">
                         Selecione...
                     </option>
 
@@ -2058,7 +2058,9 @@ async function salvarAtividade() {
     !data ||
     !atividade ||
     !tecnico ||
-    !local
+    !local ||
+    !prioridade ||
+    !status
 ) {
 
     alert(
