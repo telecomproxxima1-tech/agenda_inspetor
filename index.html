@@ -2055,17 +2055,19 @@ async function salvarAtividade() {
 
 
     if (
-        !atividade ||
-        !tecnico
-    ) {
+    !data ||
+    !atividade ||
+    !tecnico ||
+    !local
+) {
 
-        alert(
-            "Preencha a atividade e o nome do técnico."
-        );
+    alert(
+        "Preencha todos os campos da atividade."
+    );
 
-        return;
+    return;
 
-    }
+}
 
 
     const botao =
