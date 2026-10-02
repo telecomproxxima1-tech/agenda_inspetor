@@ -520,972 +520,126 @@ button:disabled {
 @media(max-width:800px){.tecnicos-filtros{grid-template-columns:1fr}.tecnico-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.tecnicos-kpis{grid-template-columns:1fr 1fr}.tecnico-grid{grid-template-columns:1fr}.tecnicos-topo{align-items:flex-start}.tecnico-kpi{padding:12px}.kpi-numero{font-size:19px}}
 
-.tabela-ferramentas{width:100%;border-collapse:collapse}
-.tabela-ferramentas th,.tabela-ferramentas td{border:1px solid #e1e6e9;padding:8px;font-size:12px;text-align:left}
-.tabela-ferramentas th{background:#f5f7f9}
-.tecnico-carregando{padding:30px;text-align:center;color:#607d8b}
-@media(max-width:800px){.tecnicos-filtros{grid-template-columns:1fr}.tecnico-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:600px){.tecnico-grid{grid-template-columns:1fr}}
+/* =========================================================
+   VISUALIZAÇÃO ESTILO PLANILHA DE CONTROLE
+========================================================= */
+.tabela-ferramentas-wrap{
+    width:100%;
+    overflow:auto;
+    border:1px solid #b8c4cc;
+    border-radius:4px;
+    background:#fff;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.tabela-ferramentas{
+    width:max-content;
+    min-width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+}
+.tabela-ferramentas th,
+.tabela-ferramentas td{
+    border:1px solid #c9d1d6;
+    padding:7px 9px;
+    font-size:12px;
+    line-height:1.25;
+    text-align:center;
+    white-space:nowrap;
+    vertical-align:middle;
+}
+.tabela-ferramentas thead tr:first-child th{
+    background:#dce6ee;
+    color:#263746;
+    font-size:12px;
+    font-weight:800;
+    height:34px;
+}
+.tabela-ferramentas thead tr:nth-child(2) th{
+    background:#eef2f5;
+    color:#4d5d68;
+    font-size:10px;
+    font-weight:800;
+    text-transform:uppercase;
+    height:30px;
+}
+.tabela-ferramentas .col-item{
+    position:sticky;
+    left:0;
+    z-index:4;
+    width:230px;
+    min-width:230px;
+    max-width:230px;
+    text-align:left;
+    background:#fff;
+    box-shadow:2px 0 0 #9daab2;
+}
+.tabela-ferramentas thead .col-item{
+    background:#cbd8e1;
+    z-index:7;
+}
+.tabela-ferramentas .grupo-inspecao{
+    min-width:190px;
+    background:#d2e0ea !important;
+    color:#1f4f6d !important;
+    border-left:2px solid #8fa5b4;
+    border-right:2px solid #8fa5b4;
+}
+.tabela-ferramentas .sub-inspecao{
+    min-width:95px;
+}
+.tabela-ferramentas .inicio-inspecao{
+    border-left:2px solid #8fa5b4 !important;
+}
+.tabela-ferramentas .fim-inspecao{
+    border-right:2px solid #8fa5b4 !important;
+}
+.tabela-ferramentas tbody tr:nth-child(even) td{
+    background:#f8fafb;
+}
+.tabela-ferramentas tbody tr:nth-child(even) .col-item{
+    background:#f1f5f7;
+}
+.tabela-ferramentas tbody tr:hover td{
+    background:#eaf3f8;
+}
+.tabela-ferramentas tbody tr:hover .col-item{
+    background:#e1edf4;
+}
+.tabela-ferramentas .valor-inspecao{
+    font-weight:700;
+    color:#263746;
+}
+.tabela-ferramentas .data-inspecao{
+    color:#526875;
+    font-variant-numeric:tabular-nums;
+}
+.tabela-ferramentas .sem-dado{
+    color:#9aa7ae;
+}
+.inspecoes-legenda{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin:0 0 8px;
+    padding:7px 10px;
+    border:1px solid #d3dce1;
+    border-radius:4px;
+    background:#f5f7f8;
+    color:#60727d;
+    font-size:11px;
+}
+.inspecoes-legenda strong{
+    color:#344955;
+}
+@media(max-width:700px){
+    .tabela-ferramentas .col-item{
+        width:180px;
+        min-width:180px;
+        max-width:180px;
+    }
+}
 
-</style>
-
-</head>
-
-<body>
-
-<div class="container">
-
-    <!-- TOPO -->
-
-    <div class="topo">
-
-        <div>
-
-            <h1>
-                📋 Agenda de Atividades do Inspetor
-            </h1>
-
-            <div class="subtitulo">
-                Planejamento e acompanhamento semanal dos serviços
-            </div>
-
-            <div
-                id="statusConexao"
-                class="status-conexao">
-                Conectando à Google Planilha...
-            </div>
-
-        </div>
-
-        <div class="topo-acoes">
-
-            <span
-                id="statusLogin"
-                class="status-login">
-                👤 Visualização pública
-            </span>
-
-            <button
-                id="btnLogin"
-                class="btn-login"
-                onclick="abrirLogin()">
-
-                🔐 Login
-
-            </button>
-
-            <button
-                id="btnSair"
-                class="btn-sair oculto"
-                onclick="sair()">
-
-                Sair
-
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <!-- ABAS DO INSPETOR -->
-
-    <div class="abas-inspetor">
-
-        <button id="abaAgenda"
-                class="aba-inspetor ativa"
-                onclick="abrirAbaInspetor('agenda')">
-            📋 Agenda
-        </button>
-
-        <button id="abaTecnicos"
-                class="aba-inspetor"
-                onclick="abrirAbaInspetor('tecnicos')">
-            👷 Técnicos
-        </button>
-
-    </div>
-
-
-    <div id="agendaView" class="view-inspetor">
-
-    <!-- RESUMO -->
-
-    <div class="resumo">
-
-        <div class="card-resumo">
-
-            <div
-                class="numero"
-                id="total">
-                0
-            </div>
-
-            <div class="descricao">
-                Total de atividades
-            </div>
-
-        </div>
-
-
-        <div class="card-resumo">
-
-            <div
-                class="numero"
-                id="planejados">
-                0
-            </div>
-
-            <div class="descricao">
-                Planejadas
-            </div>
-
-        </div>
-
-
-        <div class="card-resumo">
-
-            <div
-                class="numero"
-                id="andamento">
-                0
-            </div>
-
-            <div class="descricao">
-                Em andamento
-            </div>
-
-        </div>
-
-
-        <div class="card-resumo">
-
-            <div
-                class="numero"
-                id="concluidos">
-                0
-            </div>
-
-            <div class="descricao">
-                Concluídas
-            </div>
-
-        </div>
-
-
-        <div class="card-resumo">
-
-            <div
-                class="numero"
-                id="pendentes">
-                0
-            </div>
-
-            <div class="descricao">
-                Pendentes
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- CADASTRO ADMINISTRATIVO -->
-
-    <div
-        id="painelCadastro"
-        class="painel oculto">
-
-        <h2>
-            ➕ Nova atividade
-        </h2>
-
-        <div class="form-grid">
-
-            <div>
-
-                <label>
-                    Data da atividade
-                </label>
-
-                <input
-                    type="date"
-                    id="data">
-
-            </div>
-
-
-            <div>
-
-                <label>
-                    Atividade
-                </label>
-
-                <select id="atividade">
-
-                    <option value="">
-                        Selecione...
-                    </option>
-
-                    <option value="Apoio Tecnico">
-                        Apoio Técnico
-                    </option>
-
-                    <option value="Lavagem Veiculo">
-                        Lavagem Veiculo
-                    </option>
-
-                    <option value="Manutenção Veiculo">
-                        Manutenção Veículo
-                    </option>
-
-                    <option value="Vistoria Ferramentas">
-                        Vistoria Ferramentas
-                    </option>
-
-                    <option value="Análise Desempenho">
-                        Análise Desempenho 
-                    </option>
-
-                    <option value="Viagem">
-                        Viagem
-                    </option>
-
-                    <option value="Supervisão">
-                        Supervisão
-                    </option>
-
-                    <option value="Manutenção Ferramenta">
-                        Manutenção Ferramenta
-                    </option>
-
-                    <option value="Inventário">
-                        Inventário
-                    </option>
-
-                    <option value="Outro">
-                        Outro
-                    </option>
-
-                </select>
-            </div>
-
-
-            <div>
-
-                <label>
-                    Nome do técnico
-                </label>
-
-                  <select id="tecnico">
-
-                    <option value="">
-                        Selecione...
-                    </option>
-
-                    <option value="Mailton">
-                        Mailton
-                    </option>
-
-                    <option value="Johnny">
-                        Johnny
-                    </option>
-
-                    <option value="Joalisson">
-                        Joalisson
-                    </option>
-
-                    <option value="Vitor">
-                        Vitor
-                    </option>
-
-                    <option value="Roseildo">
-                        Roseildo
-                    </option>
-
-                    <option value="Danillo Lima">
-                        Danillo Lima
-                    </option>
-
-                    <option value="Renan">
-                        Renan
-                    </option>
-
-                    <option value="Marizaldo">
-                        Marizaldo
-                    </option>
-
-                    <option value="Leonildo">
-                        Leonildo
-                    </option>
-
-                    <option value="Juelyson">
-                        Juelyson
-                    </option>
-
-                    <option value="Lindomar">
-                        Lindomar
-                    </option>
-
-                    <option value="Danilo Siqueira">
-                        Danilo Siqueira
-                    </option>
-
-                    <option value="Samuel">
-                        Samuel
-                    </option>
-
-                    <option value="Outro">
-                        Outro
-                    </option>
-
-                  </select>
-            </div>
-
-
-            <div>
-
-                <label>
-                    Cidade / Local
-                </label>
-
-                <select id="local">
-
-                    <option value="">
-                        Selecione...
-                    </option>
-
-                    <option value="Soledade">
-                        Soledade
-                    </option>
-
-                    <option value="Juazeirinho">
-                        Juazeirinho
-                    </option>
-
-                    <option value="Santa Luzia">
-                        Santa Luzia
-                    </option>
-
-                    <option value="Seridó">
-                        Seridó
-                    </option>
-
-                    <option value="Taperoá">
-                        Taperoá
-                    </option>
-
-                    <option value="Boa vista">
-                        Boa vista
-                    </option>
-
-                    <option value="Olivedos">
-                        Olivedos
-                    </option>
-
-                    <option value="Gurjão">
-                        Gurjão
-                    </option>
-
-                    <option value="Tenório">
-                        Tenório
-                    </option>
-
-                    <option value="Junco">
-                        Junco
-                    </option>
-
-                    <option value="Equador">
-                        Equador
-                    </option>
-
-                    <option value="São José">
-                        São José
-                    </option>
-
-                    <option value="São Mamede">
-                        São Mamede
-                    </option>
-
-                    <option value="Varzea">
-                        Varzea
-                    </option>
-
-                    <option value="Ouro Branco">
-                        Ouro Branco
-                    </option>
-
-                   <option value="Outro">
-                        Outro
-                   </option>
-
-                </select>
-            </div>
-
-
-            <div>
-
-                <label>
-                    Prioridade
-                </label>
-
-                <select id="prioridade">
-
-                    <option value="">
-                        Selecione...
-                    </option>
-
-                    <option value="Média">
-                        Média
-                    </option>
-
-                    <option value="Alta">
-                        Alta
-                    </option>
-
-                    <option value="Baixa">
-                        Baixa
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div>
-
-                <label>
-                    Status do serviço
-                </label>
-
-                <select id="status">
-
-                    <option value="">
-                        Selecione...
-                    </option>
-
-                    <option value="Planejado">
-                        Planejado
-                    </option>
-
-                    <option value="Em andamento">
-                        Em andamento
-                    </option>
-
-                    <option value="Concluído">
-                        Concluído
-                    </option>
-
-                    <option value="Pendente">
-                        Pendente
-                    </option>
-
-                </select>
-
-            </div>
-
-        </div>
-
-
-        <button
-            class="btn-adicionar"
-            id="btnSalvar"
-            onclick="salvarAtividade()">
-
-            Adicionar atividade
-
-        </button>
-
-
-        <button
-            class="btn-secundario"
-            id="btnCancelar"
-            onclick="cancelarEdicao()"
-            style="display:none">
-
-            Cancelar edição
-
-        </button>
-
-    </div>
-
-
-    <!-- FILTROS -->
-
-    <div class="painel">
-
-        <h2>
-            🔎 Filtros
-        </h2>
-
-
-        <div class="acoes-topo">
-
-            <input
-                class="pesquisa"
-                type="text"
-                id="pesquisa"
-                placeholder="🔎 Pesquisar atividade, técnico ou local"
-                oninput="renderizar()">
-
-
-            <button
-                class="btn-exportar"
-                onclick="exportarCSV()">
-
-                ⬇ Exportar CSV
-
-            </button>
-
-
-            <button
-                id="btnLimpar"
-                class="btn-limpar oculto"
-                onclick="limparAgenda()">
-
-                🗑 Limpar agenda
-
-            </button>
-
-        </div>
-
-
-        <div class="filtros">
-
-            <select
-                id="filtroTecnico"
-                onchange="renderizar()">
-
-                <option value="">
-                    Todos os técnicos
-                </option>
-
-            </select>
-
-
-            <select
-                id="filtroStatus"
-                onchange="renderizar()">
-
-                <option value="">
-                    Todos os status
-                </option>
-
-                <option value="Planejado">
-                    Planejado
-                </option>
-
-                <option value="Em andamento">
-                    Em andamento
-                </option>
-
-                <option value="Concluído">
-                    Concluído
-                </option>
-
-                <option value="Pendente">
-                    Pendente
-                </option>
-
-            </select>
-
-        </div>
-
-    </div>
-
-
-    <!-- NAVEGAÇÃO DAS SEMANAS -->
-
-    <div class="painel">
-
-        <div class="navegacao">
-
-            <button
-                class="btn-semana"
-                onclick="semanaAnterior()">
-
-                ◀ Semana anterior
-
-            </button>
-
-
-            <button
-                class="btn-hoje"
-                onclick="irParaHoje()">
-
-                📅 Semana atual
-
-            </button>
-
-
-            <button
-                class="btn-semana"
-                onclick="proximaSemana()">
-
-                Próxima semana ▶
-
-            </button>
-
-        </div>
-
-
-        <div
-            class="semana-info"
-            id="semanaInfo">
-
-        </div>
-
-    </div>
-
-
-    <!-- AGENDA -->
-
-    <div class="agenda">
-
-
-        <div class="dia">
-
-            <div class="cabecalho-dia">
-
-                SEGUNDA
-
-                <div
-                    class="data-dia"
-                    id="dataSegunda">
-                </div>
-
-            </div>
-
-            <div id="Segunda"></div>
-
-        </div>
-
-
-        <div class="dia">
-
-            <div class="cabecalho-dia">
-
-                TERÇA
-
-                <div
-                    class="data-dia"
-                    id="dataTerca">
-                </div>
-
-            </div>
-
-            <div id="Terça"></div>
-
-        </div>
-
-
-        <div class="dia">
-
-            <div class="cabecalho-dia">
-
-                QUARTA
-
-                <div
-                    class="data-dia"
-                    id="dataQuarta">
-                </div>
-
-            </div>
-
-            <div id="Quarta"></div>
-
-        </div>
-
-
-        <div class="dia">
-
-            <div class="cabecalho-dia">
-
-                QUINTA
-
-                <div
-                    class="data-dia"
-                    id="dataQuinta">
-                </div>
-
-            </div>
-
-            <div id="Quinta"></div>
-
-        </div>
-
-
-        <div class="dia">
-
-            <div class="cabecalho-dia">
-
-                SEXTA
-
-                <div
-                    class="data-dia"
-                    id="dataSexta">
-                </div>
-
-            </div>
-
-            <div id="Sexta"></div>
-
-        </div>
-
-
-        <div class="dia">
-
-            <div class="cabecalho-dia">
-
-                SÁBADO
-
-                <div
-                    class="data-dia"
-                    id="dataSabado">
-                </div>
-
-            </div>
-
-            <div id="Sábado"></div>
-
-        </div>
-
-
-        <div class="dia">
-
-            <div class="cabecalho-dia">
-
-                DOMINGO
-
-                <div
-                    class="data-dia"
-                    id="dataDomingo">
-                </div>
-
-            </div>
-
-            <div id="Domingo"></div>
-
-        </div>
-
-
-    </div>
-
-    </div>
-
-    </div>
-
-
-    <!-- ÁREA DE TÉCNICOS -->
-
-    <div id="tecnicosView" class="view-inspetor oculto">
-
-        <div class="tecnicos-dashboard">
-
-            <div class="painel" style="margin-bottom:0">
-                <div class="tecnicos-topo">
-                    <div class="tecnicos-titulo">
-                        <div class="tecnicos-icone">👷</div>
-                        <div>
-                            <h2>Equipe de técnicos</h2>
-                            <div class="subtitulo">
-                                Visão geral cadastral e acesso rápido às informações da equipe
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="btn-atualizar-tecnicos"
-                            onclick="carregarTecnicosInspetor(true)">
-                        🔄 Atualizar dados
-                    </button>
-                </div>
-            </div>
-
-            <div class="tecnicos-kpis">
-                <div class="tecnico-kpi">
-                    <div class="kpi-icone">👥</div>
-                    <div>
-                        <div id="kpiTotalTecnicos" class="kpi-numero">0</div>
-                        <div class="kpi-label">Total de técnicos</div>
-                    </div>
-                </div>
-
-                <div class="tecnico-kpi">
-                    <div class="kpi-icone">🟢</div>
-                    <div>
-                        <div id="kpiAtivosTecnicos" class="kpi-numero">0</div>
-                        <div class="kpi-label">Ativos</div>
-                    </div>
-                </div>
-
-                <div class="tecnico-kpi">
-                    <div class="kpi-icone">📍</div>
-                    <div>
-                        <div id="kpiCidadesTecnicos" class="kpi-numero">0</div>
-                        <div class="kpi-label">Cidades</div>
-                    </div>
-                </div>
-
-                <div class="tecnico-kpi">
-                    <div class="kpi-icone">📋</div>
-                    <div>
-                        <div id="kpiExibidosTecnicos" class="kpi-numero">0</div>
-                        <div class="kpi-label">Exibidos no filtro</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="painel" style="margin-bottom:0">
-                <div class="tecnicos-filtros">
-                    <input type="text"
-                           id="pesquisaTecnicos"
-                           placeholder="🔎 Pesquisar por nome, matrícula ou telefone"
-                           oninput="filtrarTecnicosInspetor()">
-
-                    <select id="filtroCidadeTecnicos"
-                            onchange="filtrarTecnicosInspetor()">
-                        <option value="">Todas as cidades</option>
-                    </select>
-
-                    <select id="filtroStatusTecnicos"
-                            onchange="filtrarTecnicosInspetor()">
-                        <option value="">Todos os status</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="tecnicos-statusbar">
-                <div id="statusTecnicos" class="status-conexao">
-                    Técnicos ainda não carregados.
-                </div>
-
-                <div id="contagemTecnicos" class="tecnicos-contagem">
-                    0 técnicos exibidos
-                </div>
-            </div>
-
-            <div class="tabela-tecnicos-card">
-                <div class="tabela-tecnicos-wrap">
-                    <table class="tabela-tecnicos">
-                        <thead>
-                            <tr>
-                                <th>Técnico</th>
-                                <th>Matrícula</th>
-                                <th>Cidade</th>
-                                <th>Telefone</th>
-                                <th>Status</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
-
-                        <tbody id="listaTecnicosInspetor">
-                            <tr>
-                                <td colspan="6" class="tecnico-vazio">
-                                    Clique em "Técnicos" para carregar os dados.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-
-    <!-- MODAL DETALHES DO TÉCNICO -->
-
-<div id="modalTecnico"
-     class="modal modal-tecnico oculto">
-
-    <div class="login-caixa">
-
-        <div id="detalhesTecnico">
-            <div class="tecnico-carregando">
-                Carregando informações...
-            </div>
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- MODAL LOGIN -->
-
-<div
-    id="modalLogin"
-    class="modal oculto">
-
-    <div class="login-caixa">
-
-        <h2>
-            🔐 Acesso administrativo
-        </h2>
-
-
-        <div class="login-campo">
-
-            <label>
-                Usuário
-            </label>
-
-            <input
-                type="text"
-                id="loginUsuario"
-                autocomplete="username">
-
-        </div>
-
-
-        <div class="login-campo">
-
-            <label>
-                Senha
-            </label>
-
-            <input
-                type="password"
-                id="loginSenha"
-                autocomplete="current-password">
-
-        </div>
-
-
-        <div
-            id="erroLogin"
-            class="erro-login">
-        </div>
-
-
-        <div class="login-botoes">
-
-            <button
-                class="btn-secundario"
-                onclick="fecharLogin()">
-
-                Cancelar
-
-            </button>
-
-
-            <button
-                class="btn-login"
-                id="btnEntrar"
-                onclick="login()">
-
-                Entrar
-
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<script>
 
 /* =========================================================
    CONFIGURAÇÃO
@@ -1890,54 +1044,111 @@ function renderizarDetalhesTecnico(t) {
 
         ferramentasHtml = `
             <div class="tecnico-carregando">
-                Nenhuma ferramenta cadastrada.
+                Nenhum item de ferramenta, EPI ou EPC cadastrado.
             </div>
         `;
 
     } else {
 
-        ferramentasHtml = `
-            <table class="tabela-ferramentas">
+        /*
+         * A primeira coluna fica fixa com o nome do item.
+         * As inspeções ficam separadas em grupos:
+         * Inspeção 1 | Validação | Data
+         * Inspeção 2 | Validação | Data
+         * etc.
+         */
+        const totalInspecoes = Math.max(
+            1,
+            ...ferramentas.map(f =>
+                Array.isArray(f.inspecoes)
+                    ? f.inspecoes.length
+                    : 0
+            )
+        );
 
-                <thead>
-                    <tr>
-                        <th>Ferramenta</th>
-                        <th>Validação</th>
-                        <th>Data da inspeção</th>
-                    </tr>
-                </thead>
+        const cabecalhoInspecoes = Array.from(
+            { length: totalInspecoes },
+            (_, indice) => `
+                <th class="grupo-inspecao" colspan="2">
+                    Inspeção ${indice + 1}
+                </th>
+            `
+        ).join("");
 
-                <tbody>
+        const subCabecalhoInspecoes = Array.from(
+            { length: totalInspecoes },
+            (_, indice) => `
+                <th class="sub-inspecao inicio-inspecao">Validação</th>
+                <th class="sub-inspecao fim-inspecao">Data</th>
+            `
+        ).join("");
 
-                    ${
-                        ferramentas.map(f => {
+        const linhas = ferramentas.map(f => {
 
-                            if (
-                                !f.inspecoes ||
-                                !f.inspecoes.length
-                            ) {
-                                return `
-                                    <tr>
-                                        <td>${esc(f.nome)}</td>
-                                        <td colspan="2">-</td>
-                                    </tr>
-                                `;
-                            }
+            const inspecoes = Array.isArray(f.inspecoes)
+                ? f.inspecoes
+                : [];
 
-                            return f.inspecoes.map(i => `
-                                <tr>
-                                    <td>${esc(f.nome)}</td>
-                                    <td>${esc(i.validacao || "-")}</td>
-                                    <td>${esc(i.data || "-")}</td>
-                                </tr>
-                            `).join("");
+            const celulasInspecoes = Array.from(
+                { length: totalInspecoes },
+                (_, indice) => {
 
-                        }).join("")
+                    const inspecao = inspecoes[indice];
+
+                    if (!inspecao) {
+                        return `
+                            <td class="sem-dado inicio-inspecao">—</td>
+                            <td class="sem-dado fim-inspecao">—</td>
+                        `;
                     }
 
-                </tbody>
+                    return `
+                        <td class="valor-inspecao inicio-inspecao">
+                            ${esc(inspecao.validacao || "—")}
+                        </td>
+                        <td class="data-inspecao fim-inspecao">
+                            ${esc(inspecao.data || "—")}
+                        </td>
+                    `;
+                }
+            ).join("");
 
-            </table>
+            return `
+                <tr>
+                    <td class="col-item">
+                        <strong>${esc(f.nome || "Item")}</strong>
+                    </td>
+                    ${celulasInspecoes}
+                </tr>
+            `;
+        }).join("");
+
+        ferramentasHtml = `
+            <div class="inspecoes-legenda">
+                <span><strong>Controle de inspeções</strong> — cada bloco representa uma inspeção realizada.</span>
+                <span>Role horizontalmente para consultar os demais períodos.</span>
+            </div>
+
+            <div class="tabela-ferramentas-wrap">
+                <table class="tabela-ferramentas">
+
+                    <thead>
+                        <tr>
+                            <th class="col-item">CONTROLE DE ITENS</th>
+                            ${cabecalhoInspecoes}
+                        </tr>
+                        <tr>
+                            <th class="col-item">FERRAMENTA / EPI / EPC</th>
+                            ${subCabecalhoInspecoes}
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        ${linhas}
+                    </tbody>
+
+                </table>
+            </div>
         `;
     }
 
