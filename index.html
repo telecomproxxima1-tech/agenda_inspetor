@@ -2245,6 +2245,14 @@ function situacaoPM(x){
  if(Number.isFinite(d)&&d<=15)return 'Próximo do limite';
  return 'Em dia';
 }
+function formatarDiferencaAdmitida(valor){
+ const texto=String(valor ?? '').trim();
+ if(!texto) return '';
+ const normalizado=texto.replace(/\s/g,'').replace(',', '.');
+ const numero=Number(normalizado);
+ if(!Number.isFinite(numero)) return esc(valor);
+ return numero.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
 function atualizarKpisPowerMeter(){
  document.getElementById('pmKpiTotal').textContent=powerMeters.length;
  document.getElementById('pmKpiColaboradores').textContent=new Set(powerMeters.map(x=>x.colaborador).filter(Boolean)).size;
@@ -2259,7 +2267,7 @@ function filtrarPowerMeters(){
 function renderizarPowerMeters(lista){
  const tbody=document.getElementById('listaPowerMeters');
  if(!lista.length){tbody.innerHTML='<tr><td colspan="13" class="tecnico-vazio">Nenhum registro encontrado.</td></tr>';return;}
- tbody.innerHTML=lista.map(x=>{const sit=situacaoPM(x),cls=sit==='Vencido'?'pm-vencido':sit==='Próximo do limite'?'pm-proximo':'pm-ok'; return `<tr><td class="pm-num">${esc(x.numero)}</td><td>${esc(x.modelo)}</td><td>${esc(x.colaborador)}</td><td class="pm-num">${esc(x.patrimonio)}</td><td class="pm-num">${esc(x.sinalPadrao)}</td><td class="pm-num">${esc(x.sinalEncontrado)}</td><td class="pm-num">${esc(x.diferenca)}</td><td>${esc(x.dataAfericao)}</td><td>${esc(x.inicioProxima)}</td><td>${esc(x.limiteProxima)}</td><td class="pm-num"><span class="pm-situacao ${cls}">${esc(x.diasRestantes)} — ${sit}</span></td><td>${esc(x.responsavel)}</td><td><div class="pm-acao"><button class="pm-editar" onclick="editarPowerMeter('${escJS(x.id)}')">Editar</button><button class="pm-excluir" onclick="excluirPowerMeter('${escJS(x.id)}')">Excluir</button></div></td></tr>`;}).join('');
+ tbody.innerHTML=lista.map(x=>{const sit=situacaoPM(x),cls=sit==='Vencido'?'pm-vencido':sit==='Próximo do limite'?'pm-proximo':'pm-ok'; return `<tr><td class="pm-num">${esc(x.numero)}</td><td>${esc(x.modelo)}</td><td>${esc(x.colaborador)}</td><td class="pm-num">${esc(x.patrimonio)}</td><td class="pm-num">${esc(x.sinalPadrao)}</td><td class="pm-num">${esc(x.sinalEncontrado)}</td><td class="pm-num">${formatarDiferencaAdmitida(x.diferenca)}</td><td>${esc(x.dataAfericao)}</td><td>${esc(x.inicioProxima)}</td><td>${esc(x.limiteProxima)}</td><td class="pm-num"><span class="pm-situacao ${cls}">${esc(x.diasRestantes)} — ${sit}</span></td><td>${esc(x.responsavel)}</td><td><div class="pm-acao"><button class="pm-editar" onclick="editarPowerMeter('${escJS(x.id)}')">Editar</button><button class="pm-excluir" onclick="excluirPowerMeter('${escJS(x.id)}')">Excluir</button></div></td></tr>`;}).join('');
 }
 function abrirModalPowerMeter(item=null){
  document.getElementById('modalPowerMeter').classList.remove('oculto');
