@@ -2471,6 +2471,13 @@ async function apiGet() {
 
 async function apiPost(payload) {
 
+    // O token da sessão administrativa é enviado automaticamente
+    // para as operações protegidas (Agenda e Power Meter).
+    const payloadSeguro = {
+        ...(payload || {}),
+        token: token || ""
+    };
+
     const resposta =
         await fetch(
             API_URL,
@@ -2484,7 +2491,7 @@ async function apiPost(payload) {
 
                 body:
                     JSON.stringify(
-                        payload
+                        payloadSeguro
                     )
             }
         );
