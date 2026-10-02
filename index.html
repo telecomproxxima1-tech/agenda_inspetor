@@ -2428,106 +2428,83 @@ function setStatusConexao(
    COMUNICAÇÃO COM GOOGLE APPS SCRIPT
 ========================================================= */
 
-async function apiGet() {
+/*
+ * Comunicação sem fetch/CORS.
+ *
+ * O site está hospedado no GitHub Pages e o Google Apps Script está em outro
+ * domínio. Para evitar "Failed to fetch", as chamadas usam JSONP por GET.
+ * O Apps Script recebe o mesmo payload e executa as mesmas ações do POST.
+ */
+function apiJsonp(payload) {
+    return new Promise(function(resolve, reject) {
+        const callbackName =
+            "__agendaJsonp_" +
+            Date.now() +
+            "_" +
+            Math.floor(Math.random() * 1000000);
 
-    const resposta =
-        await fetch(
-            API_URL,
-            {
-                method: "GET",
-                cache: "no-store"
-            }
-        );
+        const script = document.createElement("script");
+        let finalizado = false;
 
+        function limpar() {
+            try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
+            if (script.parentNode) script.parentNode.removeChild(script);
+        }
 
-    const texto =
-        await resposta.text();
+        const timer = setTimeout(function() {
+            if (finalizado) return;
+            finalizado = true;
+            limpar();
+            reject(new Error(
+                "Tempo esgotado ao comunicar com o Google Apps Script. " +
+                "Verifique se a implantação /exec está disponível."
+            ));
+        }, 30000);
 
+        window[callbackName] = function(dados) {
+            if (finalizado) return;
+            finalizado = true;
+            clearTimeout(timer);
+            limpar();
+            resolve(dados);
+        };
 
-    if (!resposta.ok) {
+        script.onerror = function() {
+            if (finalizado) return;
+            finalizado = true;
+            clearTimeout(timer);
+            limpar();
+            reject(new Error(
+                "Não foi possível conectar ao Google Apps Script. " +
+                "Confirme se a URL /exec do HTML é a mesma da implantação."
+            ));
+        };
 
-        throw new Error(
-            "HTTP " +
-            resposta.status
-        );
+        const query =
+            "?payload=" +
+            encodeURIComponent(JSON.stringify(payload || {})) +
+            "&callback=" +
+            encodeURIComponent(callbackName) +
+            "&_=" +
+            Date.now();
 
-    }
-
-
-    try {
-
-        return JSON.parse(texto);
-
-    } catch (e) {
-
-        throw new Error(
-            "O servidor não retornou JSON. Resposta: " +
-            texto
-        );
-
-    }
-
+        script.src = API_URL + query;
+        script.async = true;
+        document.head.appendChild(script);
+    });
 }
 
+async function apiGet() {
+    return await apiJsonp({ acao: "listarAtividades" });
+}
 
 async function apiPost(payload) {
-
-    // O token da sessão administrativa é enviado automaticamente
-    // para as operações protegidas (Agenda e Power Meter).
     const payloadSeguro = {
         ...(payload || {}),
         token: token || ""
     };
 
-    let resposta;
-    try {
-        // Envio como application/x-www-form-urlencoded: é uma requisição CORS simples
-        // e evita o preflight que pode causar "Failed to fetch" em páginas GitHub Pages.
-        resposta = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-            },
-            body: "payload=" + encodeURIComponent(JSON.stringify(payloadSeguro)),
-            cache: "no-store"
-        });
-    } catch (erroRede) {
-        throw new Error(
-            "Não foi possível conectar ao Google Apps Script. " +
-            "Verifique se a implantação está publicada como Aplicativo da Web, " +
-            "com acesso para Qualquer pessoa, e se a URL /exec do HTML é a mesma da implantação. " +
-            "Detalhe: " + (erroRede?.message || erroRede)
-        );
-    }
-
-
-    const texto =
-        await resposta.text();
-
-
-    if (!resposta.ok) {
-
-        throw new Error(
-            "HTTP " +
-            resposta.status
-        );
-
-    }
-
-
-    try {
-
-        return JSON.parse(texto);
-
-    } catch (e) {
-
-        throw new Error(
-            "O servidor não retornou JSON. Resposta: " +
-            texto
-        );
-
-    }
-
+    return await apiJsonp(payloadSeguro);
 }
 
 
