@@ -597,6 +597,7 @@ button:disabled {
 
 /* POWER METER */
 .pm-acoes-topo{display:flex;gap:8px;flex-wrap:wrap}.pm-filtros{margin-top:16px}.pm-filtros-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr;gap:12px;align-items:end}.pm-status-box{padding:12px;border-radius:10px;background:#f4f6f8;color:#455a64;font-size:13px;min-height:18px}.pm-tabela-painel{margin-top:16px}.pm-tabela-wrap{overflow:auto;max-height:65vh;border:1px solid #d9e0e5;border-radius:10px}.pm-tabela{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:12px;background:#fff}.pm-tabela th,.pm-tabela td{padding:9px 10px;border-right:1px solid #dfe5e9;border-bottom:1px solid #dfe5e9;white-space:nowrap}.pm-tabela th{position:sticky;top:0;background:#263238;color:#fff;z-index:2;text-align:left}.pm-tabela tbody tr:nth-child(even){background:#f8fafb}.pm-tabela tbody tr:hover{background:#eef5f8}.pm-tabela th:first-child,.pm-tabela td:first-child{position:sticky;left:0;z-index:3;background:inherit}.pm-tabela th:first-child{z-index:4}.pm-num{text-align:right;font-variant-numeric:tabular-nums}.pm-situacao{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:700;font-size:11px}.pm-vencido{background:#ffebee;color:#b71c1c}.pm-proximo{background:#fff3e0;color:#e65100}.pm-ok{background:#e8f5e9;color:#2e7d32}.pm-acao{display:flex;gap:5px}.pm-acao button{border:0;border-radius:7px;padding:6px 9px;cursor:pointer}.pm-editar{background:#e3f2fd;color:#1565c0}.pm-excluir{background:#ffebee;color:#c62828}.pm-modal{width:min(760px,94vw)}.pm-modal-topo{display:flex;justify-content:space-between;align-items:flex-start;gap:15px}.pm-form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}.pm-form-grid input{width:100%;box-sizing:border-box}.pm-form-info{margin-top:14px;padding:10px;border-radius:8px;background:#f5f7f9;color:#546e7a;font-size:12px}@media(max-width:900px){.pm-filtros-grid{grid-template-columns:1fr 1fr}.pm-form-grid{grid-template-columns:1fr}}@media(max-width:600px){.pm-filtros-grid{grid-template-columns:1fr}}
+.admin-only.oculto{display:none !important;}
 </style>
 
 </head>
@@ -1359,11 +1360,11 @@ button:disabled {
                 <div class="tecnicos-topo">
                     <div class="tecnicos-titulo">
                         <div class="tecnicos-icone">📡</div>
-                        <div><h2>Controle de Aferição — Power Meter</h2><div class="subtitulo">Controle exclusivo da unidade Santa Luzia. Alterações são gravadas diretamente na planilha.</div></div>
+                        <div><h2>Controle de Aferição — Power Meter</h2><div class="subtitulo">Controle exclusivo da unidade Santa Luzia. A visualização é pública; edição, inclusão e exclusão ficam disponíveis somente para o administrador logado.</div></div>
                     </div>
                     <div class="pm-acoes-topo">
                         <button class="btn-atualizar-tecnicos" onclick="carregarPowerMeters(true)">🔄 Atualizar</button>
-                        <button class="btn-login" onclick="abrirModalPowerMeter()">➕ Novo Power Meter</button>
+                        <button id="pmNovoBtn" class="btn-login admin-only" onclick="abrirModalPowerMeter()">➕ Novo Power Meter</button>
                     </div>
                 </div>
             </div>
@@ -1384,7 +1385,7 @@ button:disabled {
             <div class="painel pm-tabela-painel">
                 <div class="pm-tabela-wrap">
                     <table class="pm-tabela">
-                        <thead><tr><th>Nº</th><th>Marca/Modelo</th><th>Nome Colaborador</th><th>Patrimônio PXX</th><th>Sinal Padrão</th><th>Sinal Encontrado</th><th>Diferença Admitida</th><th>Data da aferição</th><th>Início da Próxima Aferição</th><th>Limite da Próxima Aferição</th><th>Dias Restantes</th><th>Responsável pela Calibração</th><th>Ação</th></tr></thead>
+                        <thead><tr><th>Nº</th><th>Marca/Modelo</th><th>Nome Colaborador</th><th>Patrimônio PXX</th><th>Sinal Padrão</th><th>Sinal Encontrado</th><th>Diferença Admitida</th><th>Data da aferição</th><th>Início da Próxima Aferição</th><th>Limite da Próxima Aferição</th><th>Dias Restantes</th><th>Responsável pela Calibração</th><th id="pmColunaAcao" class="admin-only">Ação</th></tr></thead>
                         <tbody id="listaPowerMeters"><tr><td colspan="13" class="tecnico-vazio">Clique em “Power Meter” para carregar os dados.</td></tr></tbody>
                     </table>
                 </div>
@@ -2218,6 +2219,7 @@ async function carregarPowerMeters(forcar=false){
     powerMetersCarregados=true;
     preencherFiltroResponsavel();
     atualizarKpisPowerMeter();
+    atualizarPermissoesPowerMeter();
     filtrarPowerMeters();
     status.textContent=`${powerMeters.length} registro(s) carregado(s) — planilha: Santa Luzia.`;
   }catch(e){status.textContent='⚠ '+e.message; document.getElementById('listaPowerMeters').innerHTML=`<tr><td colspan="13" class="tecnico-vazio">${esc(e.message)}</td></tr>`;}
@@ -2270,24 +2272,34 @@ function filtrarPowerMeters(){
  const lista=powerMeters.filter(x=>{const texto=[x.modelo,x.colaborador,x.patrimonio,x.numero].join(' ').toLowerCase(); return (!q||texto.includes(q))&&(!r||x.responsavel===r)&&(!sit||situacaoPM(x)===sit)});
  renderizarPowerMeters(lista);
 }
+function atualizarPermissoesPowerMeter(){
+ const admin=estaLogado();
+ const novo=document.getElementById('pmNovoBtn');
+ const coluna=document.getElementById('pmColunaAcao');
+ if(novo) novo.classList.toggle('oculto',!admin);
+ if(coluna) coluna.classList.toggle('oculto',!admin);
+}
 function renderizarPowerMeters(lista){
  const tbody=document.getElementById('listaPowerMeters');
  if(!lista.length){tbody.innerHTML='<tr><td colspan="13" class="tecnico-vazio">Nenhum registro encontrado.</td></tr>';return;}
- tbody.innerHTML=lista.map(x=>{const sit=situacaoPM(x),cls=sit==='Vencido'?'pm-vencido':sit==='Próximo do limite'?'pm-proximo':'pm-ok'; return `<tr><td class="pm-num">${esc(x.numero)}</td><td>${esc(x.modelo)}</td><td>${esc(x.colaborador)}</td><td class="pm-num">${esc(x.patrimonio)}</td><td class="pm-num">${esc(x.sinalPadrao)}</td><td class="pm-num">${esc(x.sinalEncontrado)}</td><td class="pm-num">${formatarDiferencaAdmitida(x.diferenca)}</td><td>${esc(x.dataAfericao)}</td><td>${esc(x.inicioProxima)}</td><td>${esc(x.limiteProxima)}</td><td class="pm-num"><span class="pm-situacao ${cls}">${esc(x.diasRestantes)} — ${sit}</span></td><td>${esc(x.responsavel)}</td><td><div class="pm-acao"><button class="pm-editar" onclick="editarPowerMeter('${escJS(x.id)}')">Editar</button><button class="pm-excluir" onclick="excluirPowerMeter('${escJS(x.id)}')">Excluir</button></div></td></tr>`;}).join('');
+ tbody.innerHTML=lista.map(x=>{const sit=situacaoPM(x),cls=sit==='Vencido'?'pm-vencido':sit==='Próximo do limite'?'pm-proximo':'pm-ok'; return `<tr><td class="pm-num">${esc(x.numero)}</td><td>${esc(x.modelo)}</td><td>${esc(x.colaborador)}</td><td class="pm-num">${esc(x.patrimonio)}</td><td class="pm-num">${esc(x.sinalPadrao)}</td><td class="pm-num">${esc(x.sinalEncontrado)}</td><td class="pm-num">${formatarDiferencaAdmitida(x.diferenca)}</td><td>${esc(x.dataAfericao)}</td><td>${esc(x.inicioProxima)}</td><td>${esc(x.limiteProxima)}</td><td class="pm-num"><span class="pm-situacao ${cls}">${esc(x.diasRestantes)} — ${sit}</span></td><td>${esc(x.responsavel)}</td>${estaLogado() ? `<td><div class="pm-acao"><button class="pm-editar" onclick="editarPowerMeter('${escJS(x.id)}')">Editar</button><button class="pm-excluir" onclick="excluirPowerMeter('${escJS(x.id)}')">Excluir</button></div></td>` : ''}</tr>`;}).join('');
 }
 function abrirModalPowerMeter(item=null){
+ if(!estaLogado()){ alert('Apenas o usuário administrador logado pode editar os Power Meters.'); return; }
  document.getElementById('modalPowerMeter').classList.remove('oculto');
  document.getElementById('pmModalTitulo').textContent=item?'📡 Editar Power Meter':'📡 Novo Power Meter';
  document.getElementById('pmId').value=item?item.id:''; document.getElementById('pmNumero').value=item?.numero||''; document.getElementById('pmModelo').value=item?.modelo||''; document.getElementById('pmColaborador').value=item?.colaborador||''; document.getElementById('pmPatrimonio').value=item?.patrimonio||''; document.getElementById('pmPadrao').value=item?.sinalPadrao??''; document.getElementById('pmEncontrado').value=item?.sinalEncontrado??''; document.getElementById('pmData').value=item?.dataAfericaoISO||''; document.getElementById('pmResponsavel').value=item?.responsavel||'';
 }
 function fecharModalPowerMeter(){document.getElementById('modalPowerMeter').classList.add('oculto');}
-function editarPowerMeter(id){const item=powerMeters.find(x=>String(x.id)===String(id)); if(item) abrirModalPowerMeter(item);}
+function editarPowerMeter(id){ if(!estaLogado()){ alert('Apenas o usuário administrador logado pode editar os Power Meters.'); return; } const item=powerMeters.find(x=>String(x.id)===String(id)); if(item) abrirModalPowerMeter(item);}
 async function salvarPowerMeter(){
+ if(!estaLogado()){ alert('Apenas o usuário administrador logado pode salvar alterações.'); return; }
  const item={id:document.getElementById('pmId').value,numero:document.getElementById('pmNumero').value,modelo:document.getElementById('pmModelo').value.trim(),colaborador:document.getElementById('pmColaborador').value.trim(),patrimonio:document.getElementById('pmPatrimonio').value,sinalPadrao:document.getElementById('pmPadrao').value,sinalEncontrado:document.getElementById('pmEncontrado').value,dataAfericao:document.getElementById('pmData').value,responsavel:document.getElementById('pmResponsavel').value.trim()};
  if(!item.modelo||!item.colaborador||!item.dataAfericao){alert('Preencha Marca/Modelo, Nome Colaborador e Data da aferição.');return;}
  try{const dados=await apiPost({acao:item.id?'editarPowerMeter':'adicionarPowerMeter',powerMeter:item}); if(!dados.sucesso)throw new Error(dados.mensagem||'Não foi possível salvar.'); fecharModalPowerMeter(); await carregarPowerMeters(true); alert(dados.mensagem||'Power Meter salvo.');}catch(e){alert('Erro ao salvar: '+e.message);}
 }
 async function excluirPowerMeter(id){
+ if(!estaLogado()){ alert('Apenas o usuário administrador logado pode excluir registros.'); return; }
  const item=powerMeters.find(x=>String(x.id)===String(id)); if(!item)return; if(!confirm(`Excluir o Power Meter nº ${item.numero} da aba Santa Luzia?`))return;
  try{const dados=await apiPost({acao:'excluirPowerMeter',id:id});if(!dados.sucesso)throw new Error(dados.mensagem||'Não foi possível excluir.');await carregarPowerMeters(true);alert(dados.mensagem||'Registro excluído.');}catch(e){alert('Erro ao excluir: '+e.message);}
 }
@@ -2894,6 +2906,9 @@ function atualizarInterfaceLogin() {
 
 
     renderizar();
+    atualizarPermissoesPowerMeter();
+    if (!admin) fecharModalPowerMeter();
+    if (powerMetersCarregados) filtrarPowerMeters();
 
 }
 
