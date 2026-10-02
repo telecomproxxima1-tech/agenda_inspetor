@@ -2248,10 +2248,16 @@ function situacaoPM(x){
 function formatarDiferencaAdmitida(valor){
  const texto=String(valor ?? '').trim();
  if(!texto) return '';
- const normalizado=texto.replace(/\s/g,'').replace(',', '.');
+ // Exibição: sempre exatamente 2 casas decimais, usando vírgula.
+ // O valor original recebido da planilha permanece inalterado.
+ const normalizado=texto
+   .replace(/\s/g,'')
+   .replace(/[−–—]/g,'-')
+   .replace(/,/g,'.');
  const numero=Number(normalizado);
  if(!Number.isFinite(numero)) return esc(valor);
- return numero.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+ const arredondado=Math.round((numero + Number.EPSILON) * 100) / 100;
+ return arredondado.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:false});
 }
 function atualizarKpisPowerMeter(){
  document.getElementById('pmKpiTotal').textContent=powerMeters.length;
