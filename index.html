@@ -2504,7 +2504,94 @@ async function apiPost(payload) {
         token: token || ""
     };
 
-    return await apiJsonp(payloadSeguro);
+    // Login precisa receber a resposta do servidor, então continua usando JSONP.
+    if (String(payloadSeguro.acao || "") === "login") {
+        return await apiJsonp(payloadSeguro);
+    }
+
+    /*
+     * Para gravações usamos POST através de um iframe oculto.
+     * Isso evita completamente CORS/fetch/JSONP para operações de escrita
+     * entre o GitHub Pages e o Google Apps Script.
+     */
+    return await apiPostFormulario(payloadSeguro);
+}
+
+function apiPostFormulario(payload) {
+    return new Promise(function(resolve, reject) {
+        const frameName = "__agendaPostFrame_" + Date.now() + "_" +
+            Math.floor(Math.random() * 1000000);
+
+        const iframe = document.createElement("iframe");
+        iframe.name = frameName;
+        iframe.style.display = "none";
+        iframe.setAttribute("aria-hidden", "true");
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = API_URL;
+        form.target = frameName;
+        form.style.display = "none";
+
+        const campo = document.createElement("input");
+        campo.type = "hidden";
+        campo.name = "payload";
+        campo.value = JSON.stringify(payload || {});
+        form.appendChild(campo);
+
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+
+        let finalizado = false;
+        const timeout = setTimeout(function() {
+            if (finalizado) return;
+            finalizado = true;
+            limpar();
+            reject(new Error(
+                "Tempo esgotado ao enviar os dados ao Google Apps Script."
+            ));
+        }, 30000);
+
+        function limpar() {
+            clearTimeout(timeout);
+            try { form.remove(); } catch(e) {}
+            try { iframe.remove(); } catch(e) {}
+        }
+
+        // O primeiro load pode ser o carregamento inicial do iframe.
+        // O segundo ocorre depois que o POST termina.
+        let carregamentos = 0;
+        iframe.onload = function() {
+            carregamentos++;
+            if (carregamentos < 2 || finalizado) return;
+
+            finalizado = true;
+            limpar();
+
+            resolve({
+                sucesso: true,
+                mensagem: "Dados enviados ao Google Apps Script."
+            });
+        };
+
+        iframe.onerror = function() {
+            if (finalizado) return;
+            finalizado = true;
+            limpar();
+            reject(new Error(
+                "Não foi possível enviar os dados ao Google Apps Script."
+            ));
+        };
+
+        try {
+            form.submit();
+        } catch (e) {
+            if (finalizado) return;
+            finalizado = true;
+            limpar();
+            reject(e);
+        }
+    });
 }
 
 
