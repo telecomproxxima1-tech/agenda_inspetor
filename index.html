@@ -460,6 +460,73 @@ button:disabled {
 
 }
 
+
+/* ABAS DO INSPETOR */
+.abas-inspetor{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.aba-inspetor{background:#eceff1;color:#263238}
+.aba-inspetor.ativa{background:#1565c0;color:#fff}
+.view-inspetor.oculto{display:none!important}
+
+/* ÁREA DE TÉCNICOS — PAINEL PROFISSIONAL */
+.tecnicos-dashboard{display:flex;flex-direction:column;gap:18px}
+.tecnicos-topo{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.tecnicos-titulo{display:flex;align-items:center;gap:12px}
+.tecnicos-icone{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#e3f2fd;color:#1565c0;font-size:21px}
+.tecnicos-topo h2{margin:0;color:#263238;font-size:21px}
+.tecnicos-topo .subtitulo{margin-top:4px;font-size:12px}
+.btn-atualizar-tecnicos{background:#1565c0;color:#fff;padding:10px 14px;border-radius:8px;box-shadow:0 2px 5px rgba(21,101,192,.18)}
+.btn-atualizar-tecnicos:hover{background:#0d47a1}
+.tecnicos-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tecnico-kpi{background:#fff;border:1px solid #e7edf1;border-radius:12px;padding:15px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 3px 10px rgba(38,50,56,.05)}
+.kpi-icone{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f1f6fb;font-size:18px}
+.kpi-numero{font-size:22px;font-weight:800;color:#263238;line-height:1}
+.kpi-label{font-size:11px;color:#78909c;margin-top:5px}
+.tecnicos-filtros{display:grid;grid-template-columns:minmax(260px,1fr) 210px 180px;gap:10px;padding:14px;background:#f8fafc;border:1px solid #e8edf0;border-radius:12px}
+.tecnicos-filtros input,.tecnicos-filtros select{height:42px;border-color:#d7e0e5;background:#fff}
+.tecnicos-filtros input:focus,.tecnicos-filtros select:focus{outline:none;border-color:#64b5f6;box-shadow:0 0 0 3px rgba(100,181,246,.15)}
+.tecnicos-statusbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.tecnicos-contagem{font-size:12px;color:#607d8b}
+.tabela-tecnicos-card{background:#fff;border:1px solid #e6ecef;border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(38,50,56,.05)}
+.tabela-tecnicos-wrap{overflow-x:auto}
+.tabela-tecnicos{width:100%;border-collapse:separate;border-spacing:0;background:#fff}
+.tabela-tecnicos th{background:#f7f9fa;color:#607d8b;text-align:left;padding:13px 15px;font-size:10px;text-transform:uppercase;letter-spacing:.45px;border-bottom:1px solid #e2e8eb;white-space:nowrap}
+.tabela-tecnicos td{padding:13px 15px;border-bottom:1px solid #edf1f3;font-size:13px;vertical-align:middle}
+.tabela-tecnicos tbody tr{transition:background .15s}
+.tabela-tecnicos tbody tr:hover{background:#f8fbfd}
+.tabela-tecnicos tbody tr:last-child td{border-bottom:none}
+.tecnico-identidade{display:flex;align-items:center;gap:10px;min-width:190px}
+.tecnico-avatar{width:36px;height:36px;border-radius:10px;background:#e3f2fd;color:#1565c0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:0 0 auto}
+.tecnico-nome{font-weight:700;color:#263238}
+.tecnico-meta{font-size:10px;color:#90a4ae;margin-top:2px}
+.tecnico-cidade,.tecnico-telefone{color:#546e7a}
+.status-tecnico{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:800;background:#e8f5e9;color:#2e7d32;white-space:nowrap}
+.status-tecnico::before{content:"";width:6px;height:6px;border-radius:50%;background:#43a047}
+.status-tecnico.desligado{background:#ffebee;color:#c62828}
+.status-tecnico.desligado::before{background:#e53935}
+.btn-detalhes-tecnico{background:#eef5fb;color:#1565c0;padding:8px 11px;font-size:11px;border-radius:7px}
+.btn-detalhes-tecnico:hover{background:#dcecf9}
+.tecnico-vazio{padding:45px!important;text-align:center;color:#78909c}
+.tecnico-carregando{padding:30px;text-align:center;color:#607d8b}
+.modal-tecnico .login-caixa{max-width:1050px;max-height:90vh;overflow-y:auto}
+.tecnico-cabecalho{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:18px}
+.tecnico-cabecalho h2{margin:0 0 5px;color:#1565c0}
+.tecnico-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.tecnico-campo{background:#f7f9fa;border-radius:8px;padding:11px}
+.tecnico-campo label{margin-bottom:4px;color:#78909c;font-size:10px;text-transform:uppercase}
+.tecnico-campo strong{font-size:13px;word-break:break-word}
+.tecnico-secao{margin-top:20px}
+.tecnico-secao h3{color:#455a64;margin:0 0 10px}
+@media(max-width:900px){.tecnicos-kpis{grid-template-columns:repeat(2,1fr)}.tecnicos-filtros{grid-template-columns:1fr 1fr}.tecnicos-filtros input{grid-column:1/-1}}
+@media(max-width:800px){.tecnicos-filtros{grid-template-columns:1fr}.tecnico-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.tecnicos-kpis{grid-template-columns:1fr 1fr}.tecnico-grid{grid-template-columns:1fr}.tecnicos-topo{align-items:flex-start}.tecnico-kpi{padding:12px}.kpi-numero{font-size:19px}}
+
+.tabela-ferramentas{width:100%;border-collapse:collapse}
+.tabela-ferramentas th,.tabela-ferramentas td{border:1px solid #e1e6e9;padding:8px;font-size:12px;text-align:left}
+.tabela-ferramentas th{background:#f5f7f9}
+.tecnico-carregando{padding:30px;text-align:center;color:#607d8b}
+@media(max-width:800px){.tecnicos-filtros{grid-template-columns:1fr}.tecnico-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.tecnico-grid{grid-template-columns:1fr}}
+
 </style>
 
 </head>
@@ -520,6 +587,27 @@ button:disabled {
 
     </div>
 
+
+    <!-- ABAS DO INSPETOR -->
+
+    <div class="abas-inspetor">
+
+        <button id="abaAgenda"
+                class="aba-inspetor ativa"
+                onclick="abrirAbaInspetor('agenda')">
+            📋 Agenda
+        </button>
+
+        <button id="abaTecnicos"
+                class="aba-inspetor"
+                onclick="abrirAbaInspetor('tecnicos')">
+            👷 Técnicos
+        </button>
+
+    </div>
+
+
+    <div id="agendaView" class="view-inspetor">
 
     <!-- RESUMO -->
 
@@ -1183,6 +1271,143 @@ button:disabled {
 
     </div>
 
+    </div>
+
+    </div>
+
+
+    <!-- ÁREA DE TÉCNICOS -->
+
+    <div id="tecnicosView" class="view-inspetor oculto">
+
+        <div class="tecnicos-dashboard">
+
+            <div class="painel" style="margin-bottom:0">
+                <div class="tecnicos-topo">
+                    <div class="tecnicos-titulo">
+                        <div class="tecnicos-icone">👷</div>
+                        <div>
+                            <h2>Equipe de técnicos</h2>
+                            <div class="subtitulo">
+                                Visão geral cadastral e acesso rápido às informações da equipe
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-atualizar-tecnicos"
+                            onclick="carregarTecnicosInspetor(true)">
+                        🔄 Atualizar dados
+                    </button>
+                </div>
+            </div>
+
+            <div class="tecnicos-kpis">
+                <div class="tecnico-kpi">
+                    <div class="kpi-icone">👥</div>
+                    <div>
+                        <div id="kpiTotalTecnicos" class="kpi-numero">0</div>
+                        <div class="kpi-label">Total de técnicos</div>
+                    </div>
+                </div>
+
+                <div class="tecnico-kpi">
+                    <div class="kpi-icone">🟢</div>
+                    <div>
+                        <div id="kpiAtivosTecnicos" class="kpi-numero">0</div>
+                        <div class="kpi-label">Ativos</div>
+                    </div>
+                </div>
+
+                <div class="tecnico-kpi">
+                    <div class="kpi-icone">📍</div>
+                    <div>
+                        <div id="kpiCidadesTecnicos" class="kpi-numero">0</div>
+                        <div class="kpi-label">Cidades</div>
+                    </div>
+                </div>
+
+                <div class="tecnico-kpi">
+                    <div class="kpi-icone">📋</div>
+                    <div>
+                        <div id="kpiExibidosTecnicos" class="kpi-numero">0</div>
+                        <div class="kpi-label">Exibidos no filtro</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="painel" style="margin-bottom:0">
+                <div class="tecnicos-filtros">
+                    <input type="text"
+                           id="pesquisaTecnicos"
+                           placeholder="🔎 Pesquisar por nome, matrícula ou telefone"
+                           oninput="filtrarTecnicosInspetor()">
+
+                    <select id="filtroCidadeTecnicos"
+                            onchange="filtrarTecnicosInspetor()">
+                        <option value="">Todas as cidades</option>
+                    </select>
+
+                    <select id="filtroStatusTecnicos"
+                            onchange="filtrarTecnicosInspetor()">
+                        <option value="">Todos os status</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="tecnicos-statusbar">
+                <div id="statusTecnicos" class="status-conexao">
+                    Técnicos ainda não carregados.
+                </div>
+
+                <div id="contagemTecnicos" class="tecnicos-contagem">
+                    0 técnicos exibidos
+                </div>
+            </div>
+
+            <div class="tabela-tecnicos-card">
+                <div class="tabela-tecnicos-wrap">
+                    <table class="tabela-tecnicos">
+                        <thead>
+                            <tr>
+                                <th>Técnico</th>
+                                <th>Matrícula</th>
+                                <th>Cidade</th>
+                                <th>Telefone</th>
+                                <th>Status</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="listaTecnicosInspetor">
+                            <tr>
+                                <td colspan="6" class="tecnico-vazio">
+                                    Clique em "Técnicos" para carregar os dados.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- MODAL DETALHES DO TÉCNICO -->
+
+<div id="modalTecnico"
+     class="modal modal-tecnico oculto">
+
+    <div class="login-caixa">
+
+        <div id="detalhesTecnico">
+            <div class="tecnico-carregando">
+                Carregando informações...
+            </div>
+        </div>
+
+    </div>
+
 </div>
 
 
@@ -1286,6 +1511,504 @@ let token =
 
 let usuario =
     sessionStorage.getItem("agendaUsuario") || "";
+
+/* =========================================================
+   TÉCNICOS
+========================================================= */
+
+let tecnicosInspetor = [];
+let tecnicosCarregados = false;
+
+async function abrirAbaInspetor(aba) {
+
+    const agendaView = document.getElementById("agendaView");
+    const tecnicosView = document.getElementById("tecnicosView");
+    const abaAgenda = document.getElementById("abaAgenda");
+    const abaTecnicos = document.getElementById("abaTecnicos");
+
+    const mostrarTecnicos = aba === "tecnicos";
+
+    agendaView.classList.toggle("oculto", mostrarTecnicos);
+    tecnicosView.classList.toggle("oculto", !mostrarTecnicos);
+
+    abaAgenda.classList.toggle("ativa", !mostrarTecnicos);
+    abaTecnicos.classList.toggle("ativa", mostrarTecnicos);
+
+    if (mostrarTecnicos && !tecnicosCarregados) {
+        await carregarTecnicosInspetor();
+    }
+}
+
+async function carregarTecnicosInspetor(forcar = false) {
+
+    if (tecnicosCarregados && !forcar) {
+        filtrarTecnicosInspetor();
+        return;
+    }
+
+    const status = document.getElementById("statusTecnicos");
+    status.textContent = "Carregando técnicos da planilha...";
+    status.className = "status-conexao aviso-sync";
+
+    try {
+
+        const dados = await apiPost({
+            acao: "listarTecnicos"
+        });
+
+        if (!dados.sucesso) {
+            throw new Error(
+                dados.mensagem ||
+                "Não foi possível carregar os técnicos."
+            );
+        }
+
+        tecnicosInspetor =
+            Array.isArray(dados.tecnicos)
+                ? dados.tecnicos
+                : [];
+
+        tecnicosCarregados = true;
+
+        preencherFiltrosTecnicosInspetor();
+        atualizarKpisTecnicosInspetor();
+        filtrarTecnicosInspetor();
+
+        status.textContent =
+            "✓ " + tecnicosInspetor.length +
+            " técnico(s) carregado(s).";
+
+        status.className =
+            "status-conexao sucesso-sync";
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        status.textContent =
+            "⚠ Erro ao carregar os técnicos: " +
+            erro.message;
+
+        status.className =
+            "status-conexao erro-sync";
+    }
+}
+
+function preencherFiltrosTecnicosInspetor() {
+
+    const cidade =
+        document.getElementById("filtroCidadeTecnicos");
+
+    const status =
+        document.getElementById("filtroStatusTecnicos");
+
+    const cidadeAtual = cidade.value;
+    const statusAtual = status.value;
+
+    const cidades = [
+        ...new Set(
+            tecnicosInspetor
+                .map(x => x.cidade)
+                .filter(Boolean)
+        )
+    ].sort((a,b) => a.localeCompare(b, "pt-BR"));
+
+    const statuses = [
+        ...new Set(
+            tecnicosInspetor
+                .map(x => x.status)
+                .filter(Boolean)
+        )
+    ].sort((a,b) => a.localeCompare(b, "pt-BR"));
+
+    cidade.innerHTML =
+        '<option value="">Todas as cidades</option>';
+
+    status.innerHTML =
+        '<option value="">Todos os status</option>';
+
+    cidades.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        cidade.appendChild(option);
+    });
+
+    statuses.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        status.appendChild(option);
+    });
+
+    cidade.value = cidadeAtual;
+    status.value = statusAtual;
+}
+
+function filtrarTecnicosInspetor() {
+
+    const pesquisa =
+        document.getElementById("pesquisaTecnicos")
+            .value.trim().toLowerCase();
+
+    const cidade =
+        document.getElementById("filtroCidadeTecnicos")
+            .value;
+
+    const status =
+        document.getElementById("filtroStatusTecnicos")
+            .value;
+
+    const lista = tecnicosInspetor.filter(t => {
+
+        const texto = [
+            t.nome,
+            t.matricula,
+            t.telefone,
+            t.cidade
+        ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+        return (
+            (!pesquisa || texto.includes(pesquisa)) &&
+            (!cidade || t.cidade === cidade) &&
+            (!status || t.status === status)
+        );
+    });
+
+    renderizarTecnicosInspetor(lista);
+}
+
+function obterIniciaisTecnico(nome) {
+    const partes = String(nome || "Técnico")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+    if (!partes.length) return "T";
+    if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+
+    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+}
+
+function atualizarKpisTecnicosInspetor() {
+
+    const total = tecnicosInspetor.length;
+
+    const ativos = tecnicosInspetor.filter(t =>
+        !String(t.status || "").toUpperCase().includes("DESLIG")
+    ).length;
+
+    const cidades = new Set(
+        tecnicosInspetor
+            .map(t => String(t.cidade || "").trim())
+            .filter(Boolean)
+    ).size;
+
+    document.getElementById("kpiTotalTecnicos").textContent = total;
+    document.getElementById("kpiAtivosTecnicos").textContent = ativos;
+    document.getElementById("kpiCidadesTecnicos").textContent = cidades;
+}
+
+function filtrarTecnicosInspetor() {
+
+    const pesquisa =
+        document.getElementById("pesquisaTecnicos")
+            .value.trim().toLowerCase();
+
+    const cidade =
+        document.getElementById("filtroCidadeTecnicos")
+            .value;
+
+    const status =
+        document.getElementById("filtroStatusTecnicos")
+            .value;
+
+    const lista = tecnicosInspetor.filter(t => {
+
+        const texto = [
+            t.nome,
+            t.matricula,
+            t.telefone,
+            t.cidade
+        ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+        return (
+            (!pesquisa || texto.includes(pesquisa)) &&
+            (!cidade || t.cidade === cidade) &&
+            (!status || t.status === status)
+        );
+    });
+
+    renderizarTecnicosInspetor(lista);
+}
+
+function renderizarTecnicosInspetor(lista) {
+
+    const tbody = document.getElementById("listaTecnicosInspetor");
+    const contagem = document.getElementById("contagemTecnicos");
+    const kpiExibidos = document.getElementById("kpiExibidosTecnicos");
+
+    contagem.textContent =
+        lista.length === 1
+            ? "1 técnico exibido"
+            : `${lista.length} técnicos exibidos`;
+
+    kpiExibidos.textContent = lista.length;
+
+    if (!lista.length) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="tecnico-vazio">
+                    🔎 Nenhum técnico encontrado com os filtros atuais.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = lista.map(t => {
+
+        const desligado =
+            String(t.status || "")
+                .toUpperCase()
+                .includes("DESLIG");
+
+        const iniciais = obterIniciaisTecnico(t.nome);
+
+        return `
+            <tr>
+                <td>
+                    <div class="tecnico-identidade">
+                        <div class="tecnico-avatar">${esc(iniciais)}</div>
+                        <div>
+                            <div class="tecnico-nome">${esc(t.nome || "Sem nome")}</div>
+                            <div class="tecnico-meta">${esc(t.aba || "Cadastro")}</div>
+                        </div>
+                    </div>
+                </td>
+
+                <td><strong>${esc(t.matricula || "-")}</strong></td>
+
+                <td>
+                    <span class="tecnico-cidade">
+                        📍 ${esc(t.cidade || "-")}
+                    </span>
+                </td>
+
+                <td>
+                    <span class="tecnico-telefone">
+                        ${esc(t.telefone || "-")}
+                    </span>
+                </td>
+
+                <td>
+                    <span class="status-tecnico ${desligado ? "desligado" : ""}">
+                        ${esc(t.status || "Sem status")}
+                    </span>
+                </td>
+
+                <td>
+                    <button
+                        class="btn-detalhes-tecnico"
+                        onclick="abrirDetalhesTecnico('${escJS(t.aba)}')">
+                        Ver detalhes →
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+async function abrirDetalhesTecnico(aba) {
+
+    const modal =
+        document.getElementById("modalTecnico");
+
+    const area =
+        document.getElementById("detalhesTecnico");
+
+    modal.classList.remove("oculto");
+
+    area.innerHTML = `
+        <div class="tecnico-carregando">
+            Carregando informações do técnico...
+        </div>
+    `;
+
+    try {
+
+        const dados = await apiPost({
+            acao: "buscarTecnico",
+            aba: aba
+        });
+
+        if (!dados.sucesso) {
+            throw new Error(
+                dados.mensagem ||
+                "Técnico não encontrado."
+            );
+        }
+
+        renderizarDetalhesTecnico(dados.tecnico);
+
+    } catch (erro) {
+
+        area.innerHTML = `
+            <div class="tecnico-carregando">
+                ⚠ ${esc(erro.message)}
+            </div>
+        `;
+    }
+}
+
+function renderizarDetalhesTecnico(t) {
+
+    const area =
+        document.getElementById("detalhesTecnico");
+
+    const campo = (label, valor) => `
+        <div class="tecnico-campo">
+            <label>${esc(label)}</label>
+            <strong>${esc(valor || "-")}</strong>
+        </div>
+    `;
+
+    const ferramentas =
+        Array.isArray(t.ferramentas)
+            ? t.ferramentas
+            : [];
+
+    let ferramentasHtml;
+
+    if (!ferramentas.length) {
+
+        ferramentasHtml = `
+            <div class="tecnico-carregando">
+                Nenhuma ferramenta cadastrada.
+            </div>
+        `;
+
+    } else {
+
+        ferramentasHtml = `
+            <table class="tabela-ferramentas">
+
+                <thead>
+                    <tr>
+                        <th>Ferramenta</th>
+                        <th>Validação</th>
+                        <th>Data da inspeção</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    ${
+                        ferramentas.map(f => {
+
+                            if (
+                                !f.inspecoes ||
+                                !f.inspecoes.length
+                            ) {
+                                return `
+                                    <tr>
+                                        <td>${esc(f.nome)}</td>
+                                        <td colspan="2">-</td>
+                                    </tr>
+                                `;
+                            }
+
+                            return f.inspecoes.map(i => `
+                                <tr>
+                                    <td>${esc(f.nome)}</td>
+                                    <td>${esc(i.validacao || "-")}</td>
+                                    <td>${esc(i.data || "-")}</td>
+                                </tr>
+                            `).join("");
+
+                        }).join("")
+                    }
+
+                </tbody>
+
+            </table>
+        `;
+    }
+
+    area.innerHTML = `
+
+        <div class="tecnico-cabecalho">
+
+            <div>
+                <h2>👷 ${esc(t.nome)}</h2>
+                <div class="subtitulo">
+                    ${esc(t.status || "Sem status")}
+                </div>
+            </div>
+
+            <button
+                class="btn-secundario"
+                onclick="fecharDetalhesTecnico()">
+                Fechar
+            </button>
+
+        </div>
+
+        <div class="tecnico-grid">
+
+            ${campo("Matrícula", t.matricula)}
+            ${campo("CPF", t.cpf)}
+            ${campo("E-mail", t.email)}
+
+            ${campo("Telefone", t.telefone)}
+            ${campo("Cidade", t.cidade)}
+            ${campo("Data de nascimento", t.nascimento)}
+
+            ${campo("CNH", t.cnh)}
+            ${campo("Número da CNH", t.numeroCnh)}
+            ${campo("Vencimento da CNH", t.vencimentoCnh)}
+
+            ${campo("Admissão", t.admissao)}
+            ${campo("Últimas férias", t.ferias)}
+            ${campo("Gestor", t.gestor)}
+
+            ${campo("Inspetor", t.inspetor)}
+            ${campo("Fardamento", t.fardamento)}
+            ${campo("Pai", t.pai)}
+
+            ${campo("Quantidade de calças", t.quantidadeCalca)}
+            ${campo("Quantidade de batas", t.quantidadeBata)}
+            ${campo("Nº da bota", t.numeroBota)}
+
+        </div>
+
+        <div class="tecnico-secao">
+
+            <h3>🔧 Ferramentas e inspeções</h3>
+
+            ${ferramentasHtml}
+
+        </div>
+    `;
+}
+
+function fecharDetalhesTecnico() {
+    document.getElementById("modalTecnico")
+        .classList.add("oculto");
+}
+
+function escJS(v) {
+    return String(v ?? "")
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'");
+}
+
 
 
 /* =========================================================
@@ -3265,6 +3988,20 @@ document
 /* =========================================================
    FECHAR LOGIN CLICANDO FORA
 ========================================================= */
+
+document
+    .getElementById(
+        "modalTecnico"
+    )
+    .addEventListener(
+        "click",
+        function(e) {
+            if (e.target === this) {
+                fecharDetalhesTecnico();
+            }
+        }
+    );
+
 
 document
     .getElementById(
