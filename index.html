@@ -1630,7 +1630,7 @@ button:disabled {
 ========================================================= */
 
 const API_URL =
-    "https://script.google.com/macros/s/AKfycbz4mi1QxDGZfZUYSu16VNtcizFUVcachRoxaLi_5lhf3sChY1kM_uixUODhLSr-_uYT/exec";
+    "https://script.google.com/macros/s/AKfycbxklhc-wzIddtVmkWceiwWrCqfIXQtLEldpOR47xRGmAr94rtLvyxzhboEYBcoihF72/exec";
 
 
 let atividades = [];
@@ -2479,23 +2479,26 @@ async function apiPost(payload) {
         token: token || ""
     };
 
-    const resposta =
-        await fetch(
-            API_URL,
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type":
-                        "text/plain;charset=utf-8"
-                },
-
-                body:
-                    JSON.stringify(
-                        payloadSeguro
-                    )
-            }
+    let resposta;
+    try {
+        // Envio como application/x-www-form-urlencoded: é uma requisição CORS simples
+        // e evita o preflight que pode causar "Failed to fetch" em páginas GitHub Pages.
+        resposta = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+            },
+            body: "payload=" + encodeURIComponent(JSON.stringify(payloadSeguro)),
+            cache: "no-store"
+        });
+    } catch (erroRede) {
+        throw new Error(
+            "Não foi possível conectar ao Google Apps Script. " +
+            "Verifique se a implantação está publicada como Aplicativo da Web, " +
+            "com acesso para Qualquer pessoa, e se a URL /exec do HTML é a mesma da implantação. " +
+            "Detalhe: " + (erroRede?.message || erroRede)
         );
+    }
 
 
     const texto =
