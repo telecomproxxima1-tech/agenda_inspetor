@@ -2558,12 +2558,14 @@ function apiPostFormulario(payload) {
             try { iframe.remove(); } catch(e) {}
         }
 
-        // O primeiro load pode ser o carregamento inicial do iframe.
-        // O segundo ocorre depois que o POST termina.
-        let carregamentos = 0;
+        // Formulários HTML podem ser enviados para outro domínio sem CORS.
+        // O iframe pode disparar um onload apenas para a resposta do POST;
+        // não devemos esperar um "segundo load", pois isso fazia a tela
+        // ficar aguardando até o timeout mesmo quando o Apps Script recebia
+        // a gravação.
+        let enviado = false;
         iframe.onload = function() {
-            carregamentos++;
-            if (carregamentos < 2 || finalizado) return;
+            if (!enviado || finalizado) return;
 
             finalizado = true;
             limpar();
@@ -2584,6 +2586,7 @@ function apiPostFormulario(payload) {
         };
 
         try {
+            enviado = true;
             form.submit();
         } catch (e) {
             if (finalizado) return;
