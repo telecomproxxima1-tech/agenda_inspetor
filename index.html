@@ -1,3293 +1,1113 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+/**
+ * AGENDA DO INSPETOR — API GOOGLE PLANILHAS
+ *
+ * Mantém a agenda na planilha onde este Apps Script está instalado
+ * e lê os dados dos técnicos da planilha de acompanhamento.
+ *
+ * Para usar:
+ * 1. Extensões > Apps Script.
+ * 2. Substitua o código atual por este.
+ * 3. Salve.
+ * 4. Implante como Aplicativo da web.
+ * 5. Executar como: Eu.
+ * 6. Quem tem acesso: Qualquer pessoa.
+ * 7. Mantenha a URL /exec usada no HTML.
+ */
 
-<head>
+const NOME_ABA = "Atividades";
+
+const CABECALHO = [
+  "ID",
+  "Data",
+  "Atividade",
+  "Técnico",
+  "Local",
+  "Prioridade",
+  "Status"
+];
 
-<meta charset="UTF-8">
+/*
+ * Planilha enviada com os dados dos técnicos.
+ */
+const TECNICOS_SPREADSHEET_ID =
+  "1C82k0Vz8_79jfItuCkarm8KlkowlzvMcujx6P-Yg9sk";
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
 
-<title>Agenda do Inspetor</title>
-
-<style>
-
-* {
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-}
-
-body {
-    margin: 0;
-    background: #f4f6f8;
-    color: #263238;
-}
-
-.container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 20px;
-}
-
-/* TOPO */
-
-.topo {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-h1 {
-    color: #1565c0;
-    margin: 0 0 5px;
-}
-
-.subtitulo {
-    color: #607d8b;
-}
-
-.topo-acoes {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.status-login {
-    font-size: 12px;
-    color: #607d8b;
-}
-
-/* PAINÉIS */
-
-.painel {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    margin-bottom: 20px;
-}
-
-/* FORMULÁRIO */
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-}
-
-label {
-    font-size: 13px;
-    font-weight: bold;
-    color: #455a64;
-    display: block;
-    margin-bottom: 5px;
-}
-
-input,
-select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #cfd8dc;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
-button {
-    border: none;
-    padding: 10px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-button:disabled {
-    opacity: .6;
-    cursor: not-allowed;
-}
-
-/* BOTÕES */
-
-.btn-adicionar {
-    background: #1565c0;
-    color: white;
-    margin-top: 20px;
-}
-
-.btn-adicionar:hover {
-    background: #0d47a1;
-}
-
-.btn-login {
-    background: #1565c0;
-    color: white;
-}
-
-.btn-sair {
-    background: #78909c;
-    color: white;
-}
-
-.btn-secundario {
-    background: #eceff1;
-    color: #263238;
-}
-
-.btn-exportar {
-    background: #2e7d32;
-    color: white;
-}
-
-.btn-limpar {
-    background: #78909c;
-    color: white;
-}
-
-.btn-editar {
-    background: #ff9800;
-    color: white;
-    padding: 5px 8px;
-    font-size: 11px;
-    margin-top: 8px;
-    margin-right: 5px;
-}
-
-.btn-excluir {
-    background: #ef5350;
-    color: white;
-    padding: 5px 8px;
-    font-size: 11px;
-    margin-top: 8px;
-}
-
-/* FILTROS */
-
-.filtros {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 15px;
-}
-
-.filtros select {
-    max-width: 220px;
-}
-
-.pesquisa {
-    max-width: 420px;
-}
-
-.acoes-topo {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 15px;
-}
-
-/* RESUMO */
-
-.resumo {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-
-.card-resumo {
-    flex: 1;
-    min-width: 150px;
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.07);
-}
-
-.numero {
-    font-size: 25px;
-    font-weight: bold;
-    color: #1565c0;
-}
-
-.descricao {
-    color: #607d8b;
-    font-size: 13px;
-}
-
-/* NAVEGAÇÃO DAS SEMANAS */
-
-.navegacao {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    gap: 10px;
-}
-
-.btn-semana {
-    background: #546e7a;
-    color: white;
-}
-
-.btn-hoje {
-    background: #1565c0;
-    color: white;
-}
-
-.semana-info {
-    background: #e3f2fd;
-    color: #1565c0;
-    padding: 12px;
-    border-radius: 8px;
-    text-align: center;
-    font-weight: bold;
-}
-
-/* AGENDA */
-
-.agenda {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-}
-
-.dia {
-    background: #ffffff;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    min-height: 220px;
-}
-
-.cabecalho-dia {
-    background: #1565c0;
-    color: white;
-    text-align: center;
-    padding: 10px 5px;
-    font-weight: bold;
-}
-
-.data-dia {
-    font-size: 12px;
-    font-weight: normal;
-    margin-top: 3px;
-}
-
-.atividade {
-    margin: 10px;
-    padding: 10px;
-    border-radius: 8px;
-    background: #f5f5f5;
-    border-left: 5px solid #90a4ae;
-}
-
-.atividade strong {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.tecnico {
-    font-size: 13px;
-    color: #546e7a;
-    margin-top: 5px;
-}
-
-.local {
-    font-size: 13px;
-    color: #546e7a;
-    margin-top: 5px;
-}
-
-.prioridade {
-    display: inline-block;
-    margin-top: 7px;
-    font-size: 11px;
-    font-weight: bold;
-}
-
-.alta {
-    color: #c62828;
-}
-
-.media {
-    color: #ef6c00;
-}
-
-.baixa {
-    color: #2e7d32;
-}
-
-.status {
-    display: inline-block;
-    margin-top: 8px;
-    padding: 4px 8px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: bold;
-}
-
-.planejado {
-    background: #e3f2fd;
-    color: #1565c0;
-}
-
-.andamento {
-    background: #fff3e0;
-    color: #ef6c00;
-}
-
-.concluido {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-
-.pendente {
-    background: #ffebee;
-    color: #c62828;
-}
-
-.vazio {
-    text-align: center;
-    color: #90a4ae;
-    font-size: 13px;
-    padding: 20px 5px;
-}
-
-/* LOGIN */
-
-.modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    padding: 20px;
+function obterPlanilha() {
+  return SpreadsheetApp.getActiveSpreadsheet();
 }
 
-.modal.oculto {
-    display: none !important;
-}
-
-.login-caixa {
-    width: 100%;
-    max-width: 380px;
-    background: white;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 8px 30px rgba(0,0,0,.2);
-}
-
-.login-caixa h2 {
-    color: #1565c0;
-    margin-top: 0;
-}
-
-.login-campo {
-    margin-bottom: 14px;
-}
-
-.erro-login {
-    color: #c62828;
-    font-size: 13px;
-    min-height: 18px;
-    margin-bottom: 10px;
-}
-
-.login-botoes {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-}
-
-/* STATUS */
-
-.status-conexao {
-    font-size: 12px;
-    color: #607d8b;
-    margin-top: 5px;
-}
-
-.sucesso-sync {
-    color: #2e7d32 !important;
-}
-
-.erro-sync {
-    color: #c62828 !important;
-}
-
-.aviso-sync {
-    color: #ef6c00 !important;
-}
-
-.oculto {
-    display: none !important;
-}
-
-/* RESPONSIVO */
-
-@media (max-width: 900px) {
-
-    .agenda {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .form-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .topo {
-        flex-direction: column;
-    }
-
-}
-
-@media (max-width: 600px) {
-
-    .agenda {
-        grid-template-columns: 1fr;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .navegacao {
-        flex-direction: column;
-    }
-
-}
-
-
-/* ABAS DO INSPETOR */
-.abas-inspetor{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.aba-inspetor{background:#eceff1;color:#263238}
-.aba-inspetor.ativa{background:#1565c0;color:#fff}
-.view-inspetor.oculto{display:none!important}
-
-/* ÁREA DE TÉCNICOS — PAINEL PROFISSIONAL */
-.tecnicos-dashboard{display:flex;flex-direction:column;gap:18px}
-.tecnicos-topo{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-.tecnicos-titulo{display:flex;align-items:center;gap:12px}
-.tecnicos-icone{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#e3f2fd;color:#1565c0;font-size:21px}
-.tecnicos-topo h2{margin:0;color:#263238;font-size:21px}
-.tecnicos-topo .subtitulo{margin-top:4px;font-size:12px}
-.btn-atualizar-tecnicos{background:#1565c0;color:#fff;padding:10px 14px;border-radius:8px;box-shadow:0 2px 5px rgba(21,101,192,.18)}
-.btn-atualizar-tecnicos:hover{background:#0d47a1}
-.tecnicos-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.tecnico-kpi{background:#fff;border:1px solid #e7edf1;border-radius:12px;padding:15px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 3px 10px rgba(38,50,56,.05)}
-.kpi-icone{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f1f6fb;font-size:18px}
-.kpi-numero{font-size:22px;font-weight:800;color:#263238;line-height:1}
-.kpi-label{font-size:11px;color:#78909c;margin-top:5px}
-.tecnicos-filtros{display:grid;grid-template-columns:minmax(260px,1fr) 210px 180px;gap:10px;padding:14px;background:#f8fafc;border:1px solid #e8edf0;border-radius:12px}
-.tecnicos-filtros input,.tecnicos-filtros select{height:42px;border-color:#d7e0e5;background:#fff}
-.tecnicos-filtros input:focus,.tecnicos-filtros select:focus{outline:none;border-color:#64b5f6;box-shadow:0 0 0 3px rgba(100,181,246,.15)}
-.tecnicos-statusbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.tecnicos-contagem{font-size:12px;color:#607d8b}
-.tabela-tecnicos-card{background:#fff;border:1px solid #e6ecef;border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(38,50,56,.05)}
-.tabela-tecnicos-wrap{overflow-x:auto}
-.tabela-tecnicos{width:100%;border-collapse:separate;border-spacing:0;background:#fff}
-.tabela-tecnicos th{background:#f7f9fa;color:#607d8b;text-align:left;padding:13px 15px;font-size:10px;text-transform:uppercase;letter-spacing:.45px;border-bottom:1px solid #e2e8eb;white-space:nowrap}
-.tabela-tecnicos td{padding:13px 15px;border-bottom:1px solid #edf1f3;font-size:13px;vertical-align:middle}
-.tabela-tecnicos tbody tr{transition:background .15s}
-.tabela-tecnicos tbody tr:hover{background:#f8fbfd}
-.tabela-tecnicos tbody tr:last-child td{border-bottom:none}
-.tecnico-identidade{display:flex;align-items:center;gap:10px;min-width:190px}
-.tecnico-avatar{width:36px;height:36px;border-radius:10px;background:#e3f2fd;color:#1565c0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:0 0 auto}
-.tecnico-nome{font-weight:700;color:#263238}
-.tecnico-meta{font-size:10px;color:#90a4ae;margin-top:2px}
-.tecnico-cidade,.tecnico-telefone{color:#546e7a}
-.status-tecnico{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:800;background:#e8f5e9;color:#2e7d32;white-space:nowrap}
-.status-tecnico::before{content:"";width:6px;height:6px;border-radius:50%;background:#43a047}
-.status-tecnico.desligado{background:#ffebee;color:#c62828}
-.status-tecnico.desligado::before{background:#e53935}
-.btn-detalhes-tecnico{background:#eef5fb;color:#1565c0;padding:8px 11px;font-size:11px;border-radius:7px}
-.btn-detalhes-tecnico:hover{background:#dcecf9}
-.tecnico-vazio{padding:45px!important;text-align:center;color:#78909c}
-.tecnico-carregando{padding:30px;text-align:center;color:#607d8b}
-.modal-tecnico .login-caixa{max-width:1050px;max-height:90vh;overflow-y:auto}
-.tecnico-cabecalho{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:18px}
-.tecnico-cabecalho h2{margin:0 0 5px;color:#1565c0}
-.tecnico-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
-.tecnico-campo{background:#f7f9fa;border-radius:8px;padding:11px}
-.tecnico-campo label{margin-bottom:4px;color:#78909c;font-size:10px;text-transform:uppercase}
-.tecnico-campo strong{font-size:13px;word-break:break-word}
-.tecnico-secao{margin-top:20px}
-.tecnico-secao h3{color:#455a64;margin:0 0 10px}
-@media(max-width:900px){.tecnicos-kpis{grid-template-columns:repeat(2,1fr)}.tecnicos-filtros{grid-template-columns:1fr 1fr}.tecnicos-filtros input{grid-column:1/-1}}
-@media(max-width:800px){.tecnicos-filtros{grid-template-columns:1fr}.tecnico-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:600px){.tecnicos-kpis{grid-template-columns:1fr 1fr}.tecnico-grid{grid-template-columns:1fr}.tecnicos-topo{align-items:flex-start}.tecnico-kpi{padding:12px}.kpi-numero{font-size:19px}}
-
-/* =========================================================
-   VISUALIZAÇÃO ESTILO PLANILHA DE CONTROLE
-========================================================= */
-.tabela-ferramentas-wrap{
-    width:100%;
-    overflow:auto;
-    border:1px solid #b8c4cc;
-    border-radius:4px;
-    background:#fff;
-    box-shadow:0 1px 2px rgba(0,0,0,.04);
-}
-.tabela-ferramentas{
-    width:max-content;
-    min-width:100%;
-    border-collapse:collapse;
-    table-layout:fixed;
-}
-.tabela-ferramentas th,
-.tabela-ferramentas td{
-    border:1px solid #c9d1d6;
-    padding:7px 9px;
-    font-size:12px;
-    line-height:1.25;
-    text-align:center;
-    white-space:nowrap;
-    vertical-align:middle;
-}
-.tabela-ferramentas thead tr:first-child th{
-    background:#dce6ee;
-    color:#263746;
-    font-size:12px;
-    font-weight:800;
-    height:34px;
-}
-.tabela-ferramentas thead tr:nth-child(2) th{
-    background:#eef2f5;
-    color:#4d5d68;
-    font-size:10px;
-    font-weight:800;
-    text-transform:uppercase;
-    height:30px;
-}
-.tabela-ferramentas .col-item{
-    position:sticky;
-    left:0;
-    z-index:4;
-    width:230px;
-    min-width:230px;
-    max-width:230px;
-    text-align:left;
-    background:#fff;
-    box-shadow:2px 0 0 #9daab2;
-}
-.tabela-ferramentas thead .col-item{
-    background:#cbd8e1;
-    z-index:7;
-}
-.tabela-ferramentas .grupo-inspecao{
-    min-width:190px;
-    background:#d2e0ea !important;
-    color:#1f4f6d !important;
-    border-left:2px solid #8fa5b4;
-    border-right:2px solid #8fa5b4;
-}
-.tabela-ferramentas .sub-inspecao{
-    min-width:95px;
-}
-.tabela-ferramentas .inicio-inspecao{
-    border-left:2px solid #8fa5b4 !important;
-}
-.tabela-ferramentas .fim-inspecao{
-    border-right:2px solid #8fa5b4 !important;
-}
-.tabela-ferramentas tbody tr:nth-child(even) td{
-    background:#f8fafb;
-}
-.tabela-ferramentas tbody tr:nth-child(even) .col-item{
-    background:#f1f5f7;
-}
-.tabela-ferramentas tbody tr:hover td{
-    background:#eaf3f8;
-}
-.tabela-ferramentas tbody tr:hover .col-item{
-    background:#e1edf4;
-}
-.tabela-ferramentas .valor-inspecao{
-    font-weight:700;
-    color:#263746;
-}
-.tabela-ferramentas .data-inspecao{
-    color:#526875;
-    font-variant-numeric:tabular-nums;
-}
-.tabela-ferramentas .sem-dado{
-    color:#9aa7ae;
-}
-.inspecoes-legenda{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    margin:0 0 8px;
-    padding:7px 10px;
-    border:1px solid #d3dce1;
-    border-radius:4px;
-    background:#f5f7f8;
-    color:#60727d;
-    font-size:11px;
-}
-.inspecoes-legenda strong{
-    color:#344955;
-}
-@media(max-width:700px){
-    .tabela-ferramentas .col-item{
-        width:180px;
-        min-width:180px;
-        max-width:180px;
-    }
-}
-
-
-/* =========================================================
-   CONFIGURAÇÃO
-========================================================= */
-
-const API_URL =
-    "https://script.google.com/macros/s/AKfycbxXLXwwoYbvNF-dvw_dc-XlSaO-OifH7omzhP8iOR3USv4F9Pfit5OZshScZ2nQ7h4m/exec";
-
-
-let atividades = [];
-
-let dataReferencia =
-    new Date();
-
-let idEditando = null;
-
-let sincronizando = false;
-
-
-let token =
-    sessionStorage.getItem("agendaToken") || "";
-
-
-let usuario =
-    sessionStorage.getItem("agendaUsuario") || "";
-
-/* =========================================================
-   TÉCNICOS
-========================================================= */
-
-let tecnicosInspetor = [];
-let tecnicosCarregados = false;
-
-async function abrirAbaInspetor(aba) {
-
-    const agendaView = document.getElementById("agendaView");
-    const tecnicosView = document.getElementById("tecnicosView");
-    const abaAgenda = document.getElementById("abaAgenda");
-    const abaTecnicos = document.getElementById("abaTecnicos");
-
-    const mostrarTecnicos = aba === "tecnicos";
-
-    agendaView.classList.toggle("oculto", mostrarTecnicos);
-    tecnicosView.classList.toggle("oculto", !mostrarTecnicos);
-
-    abaAgenda.classList.toggle("ativa", !mostrarTecnicos);
-    abaTecnicos.classList.toggle("ativa", mostrarTecnicos);
-
-    if (mostrarTecnicos && !tecnicosCarregados) {
-        await carregarTecnicosInspetor();
-    }
-}
-
-async function carregarTecnicosInspetor(forcar = false) {
-
-    if (tecnicosCarregados && !forcar) {
-        filtrarTecnicosInspetor();
-        return;
-    }
-
-    const status = document.getElementById("statusTecnicos");
-    status.textContent = "Carregando técnicos da planilha...";
-    status.className = "status-conexao aviso-sync";
-
-    try {
-
-        const dados = await apiPost({
-            acao: "listarTecnicos"
-        });
 
-        if (!dados.sucesso) {
-            throw new Error(
-                dados.mensagem ||
-                "Não foi possível carregar os técnicos."
-            );
-        }
+function obterAba() {
 
-        tecnicosInspetor =
-            Array.isArray(dados.tecnicos)
-                ? dados.tecnicos
-                : [];
+  const ss = obterPlanilha();
 
-        tecnicosCarregados = true;
+  let aba =
+    ss.getSheetByName(NOME_ABA);
 
-        preencherFiltrosTecnicosInspetor();
-        atualizarKpisTecnicosInspetor();
-        filtrarTecnicosInspetor();
+  if (!aba) {
 
-        status.textContent =
-            "✓ " + tecnicosInspetor.length +
-            " técnico(s) carregado(s).";
+    aba =
+      ss.insertSheet(NOME_ABA);
 
-        status.className =
-            "status-conexao sucesso-sync";
+    aba
+      .getRange(
+        1,
+        1,
+        1,
+        CABECALHO.length
+      )
+      .setValues([
+        CABECALHO
+      ]);
 
-    } catch (erro) {
+    aba.setFrozenRows(1);
 
-        console.error(erro);
+    aba.autoResizeColumns(
+      1,
+      CABECALHO.length
+    );
+  }
 
-        status.textContent =
-            "⚠ Erro ao carregar os técnicos: " +
-            erro.message;
-
-        status.className =
-            "status-conexao erro-sync";
-    }
-}
-
-function preencherFiltrosTecnicosInspetor() {
-
-    const cidade =
-        document.getElementById("filtroCidadeTecnicos");
-
-    const status =
-        document.getElementById("filtroStatusTecnicos");
-
-    const cidadeAtual = cidade.value;
-    const statusAtual = status.value;
-
-    const cidades = [
-        ...new Set(
-            tecnicosInspetor
-                .map(x => x.cidade)
-                .filter(Boolean)
-        )
-    ].sort((a,b) => a.localeCompare(b, "pt-BR"));
-
-    const statuses = [
-        ...new Set(
-            tecnicosInspetor
-                .map(x => x.status)
-                .filter(Boolean)
-        )
-    ].sort((a,b) => a.localeCompare(b, "pt-BR"));
-
-    cidade.innerHTML =
-        '<option value="">Todas as cidades</option>';
-
-    status.innerHTML =
-        '<option value="">Todos os status</option>';
-
-    cidades.forEach(item => {
-        const option = document.createElement("option");
-        option.value = item;
-        option.textContent = item;
-        cidade.appendChild(option);
-    });
-
-    statuses.forEach(item => {
-        const option = document.createElement("option");
-        option.value = item;
-        option.textContent = item;
-        status.appendChild(option);
-    });
-
-    cidade.value = cidadeAtual;
-    status.value = statusAtual;
-}
-
-function filtrarTecnicosInspetor() {
-
-    const pesquisa =
-        document.getElementById("pesquisaTecnicos")
-            .value.trim().toLowerCase();
-
-    const cidade =
-        document.getElementById("filtroCidadeTecnicos")
-            .value;
-
-    const status =
-        document.getElementById("filtroStatusTecnicos")
-            .value;
-
-    const lista = tecnicosInspetor.filter(t => {
-
-        const texto = [
-            t.nome,
-            t.matricula,
-            t.telefone,
-            t.cidade
-        ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-        return (
-            (!pesquisa || texto.includes(pesquisa)) &&
-            (!cidade || t.cidade === cidade) &&
-            (!status || t.status === status)
-        );
-    });
-
-    renderizarTecnicosInspetor(lista);
-}
-
-function obterIniciaisTecnico(nome) {
-    const partes = String(nome || "Técnico")
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean);
-
-    if (!partes.length) return "T";
-    if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
-
-    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+  return aba;
 }
-
-function atualizarKpisTecnicosInspetor() {
 
-    const total = tecnicosInspetor.length;
-
-    const ativos = tecnicosInspetor.filter(t =>
-        !String(t.status || "").toUpperCase().includes("DESLIG")
-    ).length;
-
-    const cidades = new Set(
-        tecnicosInspetor
-            .map(t => String(t.cidade || "").trim())
-            .filter(Boolean)
-    ).size;
-
-    document.getElementById("kpiTotalTecnicos").textContent = total;
-    document.getElementById("kpiAtivosTecnicos").textContent = ativos;
-    document.getElementById("kpiCidadesTecnicos").textContent = cidades;
-}
 
-function filtrarTecnicosInspetor() {
-
-    const pesquisa =
-        document.getElementById("pesquisaTecnicos")
-            .value.trim().toLowerCase();
-
-    const cidade =
-        document.getElementById("filtroCidadeTecnicos")
-            .value;
-
-    const status =
-        document.getElementById("filtroStatusTecnicos")
-            .value;
-
-    const lista = tecnicosInspetor.filter(t => {
-
-        const texto = [
-            t.nome,
-            t.matricula,
-            t.telefone,
-            t.cidade
-        ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-        return (
-            (!pesquisa || texto.includes(pesquisa)) &&
-            (!cidade || t.cidade === cidade) &&
-            (!status || t.status === status)
-        );
-    });
-
-    renderizarTecnicosInspetor(lista);
-}
+function normalizarAtividade(obj) {
 
-function renderizarTecnicosInspetor(lista) {
-
-    const tbody = document.getElementById("listaTecnicosInspetor");
-    const contagem = document.getElementById("contagemTecnicos");
-    const kpiExibidos = document.getElementById("kpiExibidosTecnicos");
-
-    contagem.textContent =
-        lista.length === 1
-            ? "1 técnico exibido"
-            : `${lista.length} técnicos exibidos`;
-
-    kpiExibidos.textContent = lista.length;
-
-    if (!lista.length) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="6" class="tecnico-vazio">
-                    🔎 Nenhum técnico encontrado com os filtros atuais.
-                </td>
-            </tr>
-        `;
-        return;
-    }
-
-    tbody.innerHTML = lista.map(t => {
-
-        const desligado =
-            String(t.status || "")
-                .toUpperCase()
-                .includes("DESLIG");
-
-        const iniciais = obterIniciaisTecnico(t.nome);
-
-        return `
-            <tr>
-                <td>
-                    <div class="tecnico-identidade">
-                        <div class="tecnico-avatar">${esc(iniciais)}</div>
-                        <div>
-                            <div class="tecnico-nome">${esc(t.nome || "Sem nome")}</div>
-                            <div class="tecnico-meta">${esc(t.aba || "Cadastro")}</div>
-                        </div>
-                    </div>
-                </td>
-
-                <td><strong>${esc(t.matricula || "-")}</strong></td>
-
-                <td>
-                    <span class="tecnico-cidade">
-                        📍 ${esc(t.cidade || "-")}
-                    </span>
-                </td>
-
-                <td>
-                    <span class="tecnico-telefone">
-                        ${esc(t.telefone || "-")}
-                    </span>
-                </td>
-
-                <td>
-                    <span class="status-tecnico ${desligado ? "desligado" : ""}">
-                        ${esc(t.status || "Sem status")}
-                    </span>
-                </td>
-
-                <td>
-                    <button
-                        class="btn-detalhes-tecnico"
-                        onclick="abrirDetalhesTecnico('${escJS(t.aba)}')">
-                        Ver detalhes →
-                    </button>
-                </td>
-            </tr>
-        `;
-    }).join("");
+  return {
+    id: String(obj.id || Date.now()),
+    data: String(obj.data || ""),
+    atividade: String(obj.atividade || "").trim(),
+    tecnico: String(obj.tecnico || "").trim(),
+    local: String(obj.local || "").trim(),
+    prioridade: String(obj.prioridade || "Média"),
+    status: String(obj.status || "Planejado")
+  };
 }
-
-async function abrirDetalhesTecnico(aba) {
-
-    const modal =
-        document.getElementById("modalTecnico");
-
-    const area =
-        document.getElementById("detalhesTecnico");
-
-    modal.classList.remove("oculto");
-
-    area.innerHTML = `
-        <div class="tecnico-carregando">
-            Carregando informações do técnico...
-        </div>
-    `;
-
-    try {
 
-        const dados = await apiPost({
-            acao: "buscarTecnico",
-            aba: aba
-        });
 
-        if (!dados.sucesso) {
-            throw new Error(
-                dados.mensagem ||
-                "Técnico não encontrado."
-            );
-        }
+function listarAtividades() {
 
-        renderizarDetalhesTecnico(dados.tecnico);
+  const aba = obterAba();
+  const ultimaLinha = aba.getLastRow();
 
-    } catch (erro) {
+  if (ultimaLinha < 2) {
+    return [];
+  }
 
-        area.innerHTML = `
-            <div class="tecnico-carregando">
-                ⚠ ${esc(erro.message)}
-            </div>
-        `;
-    }
-}
+  const valores =
+    aba
+      .getRange(
+        2,
+        1,
+        ultimaLinha - 1,
+        CABECALHO.length
+      )
+      .getValues();
 
-function renderizarDetalhesTecnico(t) {
-
-    const area =
-        document.getElementById("detalhesTecnico");
-
-    const campo = (label, valor) => `
-        <div class="tecnico-campo">
-            <label>${esc(label)}</label>
-            <strong>${esc(valor || "-")}</strong>
-        </div>
-    `;
-
-    const ferramentas =
-        Array.isArray(t.ferramentas)
-            ? t.ferramentas
-            : [];
-
-    let ferramentasHtml;
-
-    if (!ferramentas.length) {
-
-        ferramentasHtml = `
-            <div class="tecnico-carregando">
-                Nenhum item de ferramenta, EPI ou EPC cadastrado.
-            </div>
-        `;
-
-    } else {
-
-        /*
-         * A primeira coluna fica fixa com o nome do item.
-         * As inspeções ficam separadas em grupos:
-         * Inspeção 1 | Validação | Data
-         * Inspeção 2 | Validação | Data
-         * etc.
-         */
-        const totalInspecoes = Math.max(
-            1,
-            ...ferramentas.map(f =>
-                Array.isArray(f.inspecoes)
-                    ? f.inspecoes.length
-                    : 0
-            )
-        );
-
-        const cabecalhoInspecoes = Array.from(
-            { length: totalInspecoes },
-            (_, indice) => `
-                <th class="grupo-inspecao" colspan="2">
-                    Inspeção ${indice + 1}
-                </th>
-            `
-        ).join("");
-
-        const subCabecalhoInspecoes = Array.from(
-            { length: totalInspecoes },
-            (_, indice) => `
-                <th class="sub-inspecao inicio-inspecao">Validação</th>
-                <th class="sub-inspecao fim-inspecao">Data</th>
-            `
-        ).join("");
-
-        const linhas = ferramentas.map(f => {
-
-            const inspecoes = Array.isArray(f.inspecoes)
-                ? f.inspecoes
-                : [];
-
-            const celulasInspecoes = Array.from(
-                { length: totalInspecoes },
-                (_, indice) => {
-
-                    const inspecao = inspecoes[indice];
-
-                    if (!inspecao) {
-                        return `
-                            <td class="sem-dado inicio-inspecao">—</td>
-                            <td class="sem-dado fim-inspecao">—</td>
-                        `;
-                    }
-
-                    return `
-                        <td class="valor-inspecao inicio-inspecao">
-                            ${esc(inspecao.validacao || "—")}
-                        </td>
-                        <td class="data-inspecao fim-inspecao">
-                            ${esc(inspecao.data || "—")}
-                        </td>
-                    `;
-                }
-            ).join("");
-
-            return `
-                <tr>
-                    <td class="col-item">
-                        <strong>${esc(f.nome || "Item")}</strong>
-                    </td>
-                    ${celulasInspecoes}
-                </tr>
-            `;
-        }).join("");
-
-        ferramentasHtml = `
-            <div class="inspecoes-legenda">
-                <span><strong>Controle de inspeções</strong> — cada bloco representa uma inspeção realizada.</span>
-                <span>Role horizontalmente para consultar os demais períodos.</span>
-            </div>
-
-            <div class="tabela-ferramentas-wrap">
-                <table class="tabela-ferramentas">
-
-                    <thead>
-                        <tr>
-                            <th class="col-item">CONTROLE DE ITENS</th>
-                            ${cabecalhoInspecoes}
-                        </tr>
-                        <tr>
-                            <th class="col-item">FERRAMENTA / EPI / EPC</th>
-                            ${subCabecalhoInspecoes}
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        ${linhas}
-                    </tbody>
-
-                </table>
-            </div>
-        `;
-    }
-
-    area.innerHTML = `
-
-        <div class="tecnico-cabecalho">
-
-            <div>
-                <h2>👷 ${esc(t.nome)}</h2>
-                <div class="subtitulo">
-                    ${esc(t.status || "Sem status")}
-                </div>
-            </div>
-
-            <button
-                class="btn-secundario"
-                onclick="fecharDetalhesTecnico()">
-                Fechar
-            </button>
-
-        </div>
-
-        <div class="tecnico-grid">
-
-            ${campo("Matrícula", t.matricula)}
-            ${campo("CPF", t.cpf)}
-            ${campo("E-mail", t.email)}
-
-            ${campo("Telefone", t.telefone)}
-            ${campo("Cidade", t.cidade)}
-            ${campo("Data de nascimento", t.nascimento)}
-
-            ${campo("CNH", t.cnh)}
-            ${campo("Número da CNH", t.numeroCnh)}
-            ${campo("Vencimento da CNH", t.vencimentoCnh)}
-
-            ${campo("Admissão", t.admissao)}
-            ${campo("Últimas férias", t.ferias)}
-            ${campo("Gestor", t.gestor)}
-
-            ${campo("Inspetor", t.inspetor)}
-            ${campo("Fardamento", t.fardamento)}
-            ${campo("Pai", t.pai)}
-
-            ${campo("Quantidade de calças", t.quantidadeCalca)}
-            ${campo("Quantidade de batas", t.quantidadeBata)}
-            ${campo("Nº da bota", t.numeroBota)}
-
-        </div>
-
-        <div class="tecnico-secao">
-
-            <h3>🔧 Ferramentas e inspeções</h3>
-
-            ${ferramentasHtml}
-
-        </div>
-    `;
-}
+  return valores
+    .filter(linha => linha[0] !== "")
+    .map(linha => ({
 
-function fecharDetalhesTecnico() {
-    document.getElementById("modalTecnico")
-        .classList.add("oculto");
-}
+      id: String(linha[0]),
 
-function escJS(v) {
-    return String(v ?? "")
-        .replace(/\\/g, "\\\\")
-        .replace(/'/g, "\\'");
-}
+      data:
+        formatarDataPlanilha(
+          linha[1]
+        ),
 
+      atividade:
+        String(linha[2] || ""),
 
+      tecnico:
+        String(linha[3] || ""),
 
-/* =========================================================
-   DATAS
-========================================================= */
+      local:
+        String(linha[4] || ""),
 
-function formatarData(d) {
+      prioridade:
+        String(linha[5] || "Média"),
 
-    return String(d.getDate()).padStart(2, "0") +
-        "/" +
-        String(d.getMonth() + 1).padStart(2, "0") +
-        "/" +
-        d.getFullYear();
+      status:
+        String(linha[6] || "Planejado")
 
+    }));
 }
 
-
-function dataISO(d) {
-
-    return d.getFullYear() +
-        "-" +
-        String(d.getMonth() + 1).padStart(2, "0") +
-        "-" +
-        String(d.getDate()).padStart(2, "0");
-
-}
 
+function formatarDataPlanilha(valor) {
 
-/* =========================================================
-   INÍCIO DA SEMANA
-   Segunda-feira
-========================================================= */
+  if (
+    Object.prototype.toString.call(valor) ===
+      "[object Date]" &&
+    !isNaN(valor)
+  ) {
 
-function inicioSemana(d) {
+    return Utilities.formatDate(
+      valor,
+      Session.getScriptTimeZone(),
+      "yyyy-MM-dd"
+    );
+  }
 
-    let n =
-        new Date(d);
+  const texto =
+    String(valor || "").trim();
 
-    let dia =
-        n.getDay();
+  if (
+    /^\d{4}-\d{2}-\d{2}$/.test(texto)
+  ) {
+    return texto;
+  }
 
-    n.setDate(
-        n.getDate() +
-        (dia === 0 ? -6 : 1 - dia)
+  const m =
+    texto.match(
+      /^(\d{2})\/(\d{2})\/(\d{4})$/
     );
 
-    n.setHours(
+  if (m) {
+    return `${m[3]}-${m[2]}-${m[1]}`;
+  }
+
+  return texto;
+}
+
+
+/* =========================================================
+   DADOS DOS TÉCNICOS
+========================================================= */
+
+function obterPlanilhaTecnicos() {
+
+  return SpreadsheetApp.openById(
+    TECNICOS_SPREADSHEET_ID
+  );
+}
+
+
+function limparTextoRotulo(
+  valor,
+  rotulo
+) {
+
+  const texto =
+    String(valor || "").trim();
+
+  if (!texto) {
+    return "";
+  }
+
+  const inicio =
+    rotulo + ":";
+
+  if (
+    texto
+      .toLowerCase()
+      .indexOf(
+        inicio.toLowerCase()
+      ) === 0
+  ) {
+
+    return texto
+      .slice(inicio.length)
+      .trim();
+  }
+
+  return texto;
+}
+
+
+function valorCelula(
+  valores,
+  linha,
+  coluna
+) {
+
+  if (
+    !valores[linha] ||
+    valores[linha][coluna] === undefined ||
+    valores[linha][coluna] === null
+  ) {
+
+    return "";
+  }
+
+  return valores[linha][coluna];
+}
+
+
+function textoCelula(
+  valores,
+  linha,
+  coluna
+) {
+
+  return String(
+    valorCelula(
+      valores,
+      linha,
+      coluna
+    ) || ""
+  ).trim();
+}
+
+
+function formatarValorTecnico(valor) {
+
+  if (
+    Object.prototype.toString.call(valor) ===
+      "[object Date]" &&
+    !isNaN(valor)
+  ) {
+
+    return Utilities.formatDate(
+      valor,
+      Session.getScriptTimeZone(),
+      "dd/MM/yyyy"
+    );
+  }
+
+  if (typeof valor === "number") {
+
+    return String(valor)
+      .replace(/\.0$/, "");
+  }
+
+  return String(valor || "").trim();
+}
+
+
+function lerTecnicoDaAba(aba) {
+
+  const valores =
+    aba
+      .getDataRange()
+      .getValues();
+
+  const nome =
+    limparTextoRotulo(
+      valorCelula(
+        valores,
         0,
-        0,
-        0,
+        1
+      ),
+      "Colaborador"
+    );
+
+  if (!nome) {
+    return null;
+  }
+
+  const tecnico = {
+
+    aba:
+      aba.getName().trim(),
+
+    nome:
+
+      nome,
+
+    email:
+      limparTextoRotulo(
+        valorCelula(
+          valores,
+          1,
+          1
+        ),
+        "Email"
+      ),
+
+    matricula:
+      limparTextoRotulo(
+        valorCelula(
+          valores,
+          0,
+          4
+        ),
+        "Matricula"
+      ),
+
+    cpf:
+      limparTextoRotulo(
+        valorCelula(
+          valores,
+          1,
+          4
+        ),
+        "CPF"
+      ),
+
+    cnh:
+      limparTextoRotulo(
+        valorCelula(
+          valores,
+          2,
+          1
+        ),
+        "CNH"
+      ),
+
+    numeroCnh:
+      formatarValorTecnico(
+        valorCelula(
+          valores,
+          2,
+          3
+        )
+      ),
+
+    telefone:
+      limparTextoRotulo(
+        valorCelula(
+          valores,
+          2,
+          4
+        ),
+        "Fone"
+      ),
+
+    vencimentoCnh:
+      formatarValorTecnico(
+        valorCelula(
+          valores,
+          3,
+          2
+        )
+      ),
+
+    status:
+      textoCelula(
+        valores,
+        3,
+        5
+      ),
+
+    nascimento:
+      formatarValorTecnico(
+        valorCelula(
+          valores,
+          4,
+          2
+        )
+      ),
+
+    cidade:
+      limparTextoRotulo(
+        valorCelula(
+          valores,
+          4,
+          4
+        ),
+        "Cidade"
+      ),
+
+    admissao:
+      formatarValorTecnico(
+        valorCelula(
+          valores,
+          5,
+          2
+        )
+      ),
+
+    ferias:
+      formatarValorTecnico(
+        valorCelula(
+          valores,
+          5,
+          4
+        )
+      ),
+
+    gestor:
+      limparTextoRotulo(
+        valorCelula(
+          valores,
+          6,
+          1
+        ),
+        "Gestor"
+      ),
+
+    inspetor:
+      limparTextoRotulo(
+        valorCelula(
+          valores,
+          6,
+          3
+        ),
+        "Inspetor"
+      ),
+
+    fardamento:
+      formatarValorTecnico(
+        valorCelula(
+          valores,
+          7,
+          2
+        )
+      ),
+
+    pai:
+      limparTextoRotulo(
+        valorCelula(
+          valores,
+          7,
+          3
+        ),
+        "Pai"
+      ),
+
+    quantidadeCalca:
+      formatarValorTecnico(
+        valorCelula(
+          valores,
+          8,
+          2
+        )
+      ),
+
+    quantidadeBata:
+      formatarValorTecnico(
+        valorCelula(
+          valores,
+          9,
+          2
+        )
+      ),
+
+    numeroBota:
+      formatarValorTecnico(
+        valorCelula(
+          valores,
+          9,
+          4
+        )
+      ),
+
+    ferramentas: []
+
+  };
+
+
+  /*
+   * Linha 13 da planilha = índice 12.
+   * Cada inspeção ocupa duas colunas:
+   * Validação + Data.
+   */
+  for (
+    let linha = 12;
+    linha < valores.length;
+    linha++
+  ) {
+
+    const nomeFerramenta =
+      textoCelula(
+        valores,
+        linha,
         0
-    );
+      );
 
-    return n;
-
-}
-
-
-/* =========================================================
-   CACHE LOCAL
-========================================================= */
-
-function bancoLocal() {
-
-    localStorage.setItem(
-        "agendaInspetor",
-        JSON.stringify(atividades)
-    );
-
-}
-
-
-function carregarCacheLocal() {
-
-    try {
-
-        atividades =
-            JSON.parse(
-                localStorage.getItem(
-                    "agendaInspetor"
-                ) || "[]"
-            ) || [];
-
-    } catch (e) {
-
-        atividades = [];
-
+    if (!nomeFerramenta) {
+      continue;
     }
 
+    if (
+      nomeFerramenta.toUpperCase() ===
+      "FERRAMENTAS"
+    ) {
+      continue;
+    }
+
+    if (
+      nomeFerramenta.toLowerCase() ===
+      "validação"
+    ) {
+      continue;
+    }
+
+    const ferramenta = {
+      nome: nomeFerramenta,
+      inspecoes: []
+    };
+
+    for (
+      let coluna = 1;
+      coluna + 1 < valores[linha].length;
+      coluna += 2
+    ) {
+
+      const validacao =
+        formatarValorTecnico(
+          valores[linha][coluna]
+        );
+
+      const data =
+        formatarValorTecnico(
+          valores[linha][coluna + 1]
+        );
+
+      if (validacao || data) {
+
+        ferramenta.inspecoes.push({
+
+          validacao:
+            validacao,
+
+          data:
+            data
+
+        });
+      }
+    }
+
+    tecnico.ferramentas.push(
+      ferramenta
+    );
+  }
+
+  return tecnico;
+}
+
+
+function listarTecnicos() {
+
+  const planilha =
+    obterPlanilhaTecnicos();
+
+  return planilha
+    .getSheets()
+
+    .filter(
+      aba =>
+        aba.getName()
+          .trim()
+          .toLowerCase() !==
+        "modelo"
+    )
+
+    .map(
+      lerTecnicoDaAba
+    )
+
+    .filter(
+      Boolean
+    )
+
+    .map(
+      tecnico => ({
+
+        aba:
+          tecnico.aba,
+
+        nome:
+          tecnico.nome,
+
+        matricula:
+          tecnico.matricula,
+
+        cidade:
+          tecnico.cidade,
+
+        telefone:
+          tecnico.telefone,
+
+        status:
+          tecnico.status
+
+      })
+    )
+
+    .sort(
+      (a, b) =>
+        a.nome.localeCompare(
+          b.nome,
+          "pt-BR"
+        )
+    );
+}
+
+
+function buscarTecnico(identificador) {
+
+  const planilha =
+    obterPlanilhaTecnicos();
+
+  const chave =
+    String(identificador || "")
+      .trim();
+
+  if (!chave) {
+    throw new Error(
+      "Identificador do técnico não informado."
+    );
+  }
+
+  /*
+   * Primeiro procura pelo nome da aba.
+   * A comparação é normalizada para evitar
+   * problemas com espaços ou diferenças de maiúsculas.
+   */
+  const chaveNormalizada =
+    chave
+      .replace(/\\s+/g, " ")
+      .trim()
+      .toLowerCase();
+
+  let aba =
+    planilha
+      .getSheets()
+      .find(sheet =>
+        sheet
+          .getName()
+          .replace(/\\s+/g, " ")
+          .trim()
+          .toLowerCase() ===
+        chaveNormalizada
+      );
+
+  /*
+   * Se não encontrar pela aba, procura também
+   * pelo nome do colaborador ou matrícula.
+   * Isso deixa o detalhe mais resistente a alterações
+   * no nome das abas da planilha.
+   */
+  if (!aba) {
+
+    for (const sheet of planilha.getSheets()) {
+
+      if (
+        sheet
+          .getName()
+          .trim()
+          .toLowerCase() === "modelo"
+      ) {
+        continue;
+      }
+
+      const tecnico =
+        lerTecnicoDaAba(sheet);
+
+      if (!tecnico) {
+        continue;
+      }
+
+      const nomeNormalizado =
+        String(tecnico.nome || "")
+          .replace(/\\s+/g, " ")
+          .trim()
+          .toLowerCase();
+
+      const matriculaNormalizada =
+        String(tecnico.matricula || "")
+          .trim()
+          .toLowerCase();
+
+      if (
+        chaveNormalizada === nomeNormalizado ||
+        chaveNormalizada === matriculaNormalizada
+      ) {
+        aba = sheet;
+        break;
+      }
+    }
+  }
+
+  if (!aba) {
+    throw new Error(
+      "Técnico não encontrado na planilha: " + chave
+    );
+  }
+
+  const tecnico =
+    lerTecnicoDaAba(aba);
+
+  if (!tecnico) {
+    throw new Error(
+      "A aba encontrada não possui um cadastro válido de técnico."
+    );
+  }
+
+  return tecnico;
 }
 
 
 /* =========================================================
-   STATUS DA CONEXÃO
+   RESPOSTAS
 ========================================================= */
 
-function setStatusConexao(
-    texto,
-    tipo = ""
+function resposta(
+  atividades,
+  mensagem
 ) {
 
-    const el =
-        document.getElementById(
-            "statusConexao"
-        );
+  return ContentService
+    .createTextOutput(
+      JSON.stringify({
 
-    if (!el) return;
+        sucesso: true,
 
-    el.textContent =
-        texto;
+        mensagem:
+          mensagem || "",
 
-    el.className =
-        "status-conexao" +
-        (tipo
-            ? " " + tipo + "-sync"
-            : "");
+        atividades:
+          atividades
 
-}
-
-
-/* =========================================================
-   COMUNICAÇÃO COM GOOGLE APPS SCRIPT
-========================================================= */
-
-async function apiGet() {
-
-    const resposta =
-        await fetch(
-            API_URL,
-            {
-                method: "GET",
-                cache: "no-store"
-            }
-        );
-
-
-    const texto =
-        await resposta.text();
-
-
-    if (!resposta.ok) {
-
-        throw new Error(
-            "HTTP " +
-            resposta.status
-        );
-
-    }
-
-
-    try {
-
-        return JSON.parse(texto);
-
-    } catch (e) {
-
-        throw new Error(
-            "O servidor não retornou JSON. Resposta: " +
-            texto
-        );
-
-    }
-
-}
-
-
-async function apiPost(payload) {
-
-    const resposta =
-        await fetch(
-            API_URL,
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type":
-                        "text/plain;charset=utf-8"
-                },
-
-                body:
-                    JSON.stringify(
-                        payload
-                    )
-            }
-        );
-
-
-    const texto =
-        await resposta.text();
-
-
-    if (!resposta.ok) {
-
-        throw new Error(
-            "HTTP " +
-            resposta.status
-        );
-
-    }
-
-
-    try {
-
-        return JSON.parse(texto);
-
-    } catch (e) {
-
-        throw new Error(
-            "O servidor não retornou JSON. Resposta: " +
-            texto
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   SINCRONIZAÇÃO
-========================================================= */
-
-async function sincronizar() {
-
-    if (sincronizando)
-        return;
-
-
-    sincronizando = true;
-
-
-    setStatusConexao(
-        "Sincronizando com a Google Planilha...",
-        "aviso"
+      })
+    )
+    .setMimeType(
+      ContentService.MimeType.JSON
     );
-
-
-    try {
-
-        const dados =
-            await apiGet();
-
-
-        if (!dados.sucesso) {
-
-            throw new Error(
-                dados.erro ||
-                dados.message ||
-                dados.mensagem ||
-                "Falha ao buscar os dados."
-            );
-
-        }
-
-
-        atividades =
-            Array.isArray(
-                dados.atividades
-            )
-                ? dados.atividades
-                : [];
-
-
-        bancoLocal();
-
-        atualizarFiltroTecnicos();
-
-        renderizar();
-
-
-        setStatusConexao(
-            "✓ Dados sincronizados com a Google Planilha.",
-            "sucesso"
-        );
-
-
-    } catch (erro) {
-
-        console.error(
-            "Erro na sincronização:",
-            erro
-        );
-
-
-        carregarCacheLocal();
-
-        atualizarFiltroTecnicos();
-
-        renderizar();
-
-
-        setStatusConexao(
-            "⚠ Sem conexão. Exibindo o último cache local.",
-            "erro"
-        );
-
-
-    } finally {
-
-        sincronizando =
-            false;
-
-    }
-
 }
 
 
-/* =========================================================
-   LOGIN
-========================================================= */
-
-function abrirLogin() {
-
-    document
-        .getElementById(
-            "modalLogin"
-        )
-        .classList.remove(
-            "oculto"
-        );
-
-
-    document
-        .getElementById(
-            "erroLogin"
-        )
-        .textContent = "";
-
-
-    document
-        .getElementById(
-            "loginUsuario"
-        )
-        .focus();
-
-}
-
-
-function fecharLogin() {
-
-    document
-        .getElementById(
-            "modalLogin"
-        )
-        .classList.add(
-            "oculto"
-        );
-
-}
-
-
-async function login() {
-
-    const usuarioInput =
-        document
-            .getElementById(
-                "loginUsuario"
-            )
-            .value
-            .trim();
-
-
-    const senha =
-        document
-            .getElementById(
-                "loginSenha"
-            )
-            .value;
-
-
-    const erro =
-        document
-            .getElementById(
-                "erroLogin"
-            );
-
-
-    const botao =
-        document
-            .getElementById(
-                "btnEntrar"
-            );
-
-
-    erro.textContent = "";
-
-
-    if (
-        !usuarioInput ||
-        !senha
-    ) {
-
-        erro.textContent =
-            "Informe usuário e senha.";
-
-        return;
-
-    }
-
-
-    botao.disabled =
-        true;
-
-    botao.textContent =
-        "Entrando...";
-
-
-    try {
-
-        const dados =
-            await apiPost({
-
-                acao: "login",
-
-                usuario:
-                    usuarioInput,
-
-                senha:
-                    senha
-
-            });
-
-
-        console.log(
-            "Resposta do Google Apps Script:",
-            dados
-        );
-
-
-        if (!dados.sucesso) {
-
-            erro.textContent =
-                dados.erro ||
-                dados.message ||
-                dados.mensagem ||
-                "O servidor recusou o login.";
-
-            return;
-
-        }
-
-
-        if (!dados.token) {
-
-            erro.textContent =
-                "Login aceito, mas o servidor não retornou o token.";
-
-            return;
-
-        }
-
-
-        token =
-            dados.token;
-
-
-        usuario =
-            dados.usuario ||
-            usuarioInput;
-
-
-        sessionStorage.setItem(
-            "agendaToken",
-            token
-        );
-
-
-        sessionStorage.setItem(
-            "agendaUsuario",
-            usuario
-        );
-
-
-        fecharLogin();
-
-        atualizarInterfaceLogin();
-
-
-        setStatusConexao(
-            "✓ Administrador conectado.",
-            "sucesso"
-        );
-
-
-    } catch (erroCatch) {
-
-        console.error(
-            "Erro no login:",
-            erroCatch
-        );
-
-
-        erro.textContent =
-            "Não foi possível comunicar com o servidor: " +
-            erroCatch.message;
-
-
-    } finally {
-
-        botao.disabled =
-            false;
-
-        botao.textContent =
-            "Entrar";
-
-    }
-
-}
-
-
-function sair() {
-
-    token = "";
-
-    usuario = "";
-
-    sessionStorage.removeItem(
-        "agendaToken"
-    );
-
-    sessionStorage.removeItem(
-        "agendaUsuario"
-    );
-
-    idEditando = null;
-
-    cancelarEdicao();
-
-    atualizarInterfaceLogin();
-
-
-    setStatusConexao(
-        "✓ Visualização pública. Login administrativo encerrado.",
-        "sucesso"
-    );
-
-}
-
-
-function estaLogado() {
-
-    return !!token;
-
-}
-
-
-function atualizarInterfaceLogin() {
-
-    const admin =
-        estaLogado();
-
-
-    document
-        .getElementById(
-            "painelCadastro"
-        )
-        .classList.toggle(
-            "oculto",
-            !admin
-        );
-
-
-    document
-        .getElementById(
-            "btnLimpar"
-        )
-        .classList.toggle(
-            "oculto",
-            !admin
-        );
-
-
-    document
-        .getElementById(
-            "btnLogin"
-        )
-        .classList.toggle(
-            "oculto",
-            admin
-        );
-
-
-    document
-        .getElementById(
-            "btnSair"
-        )
-        .classList.toggle(
-            "oculto",
-            !admin
-        );
-
-
-    document
-        .getElementById(
-            "statusLogin"
-        )
-        .textContent =
-        admin
-            ? "👤 Administrador: " +
-              usuario
-            : "👤 Visualização pública";
-
-
-    renderizar();
-
-}
-
-
-/* =========================================================
-   FORMULÁRIO
-========================================================= */
-
-function limparFormulario() {
-
-    document
-        .getElementById(
-            "data"
-        )
-        .value =
-        dataISO(
-            new Date()
-        );
-
-
-    document
-        .getElementById(
-            "atividade"
-        )
-        .value = "";
-
-
-    document
-        .getElementById(
-            "tecnico"
-        )
-        .value = "";
-
-
-    document
-        .getElementById(
-            "local"
-        )
-        .value = "";
-
-
-    document
-        .getElementById(
-            "prioridade"
-        )
-        .value =
-        "Média";
-
-
-    document
-        .getElementById(
-            "status"
-        )
-        .value =
-        "Planejado";
-
-}
-
-
-function cancelarEdicao() {
-
-    idEditando =
-        null;
-
-    limparFormulario();
-
-
-    document
-        .getElementById(
-            "btnSalvar"
-        )
-        .innerText =
-        "Adicionar atividade";
-
-
-    document
-        .getElementById(
-            "btnCancelar"
-        )
-        .style.display =
-        "none";
-
-
-    renderizar();
-
-}
-
-
-/* =========================================================
-   ADICIONAR / EDITAR
-========================================================= */
-
-async function salvarAtividade() {
-
-    if (!estaLogado()) {
-
-        abrirLogin();
-
-        return;
-
-    }
-
-
-    const data =
-        document
-            .getElementById(
-                "data"
-            )
-            .value;
-
-
-    const atividade =
-        document
-            .getElementById(
-                "atividade"
-            )
-            .value
-            .trim();
-
-
-    const tecnico =
-        document
-            .getElementById(
-                "tecnico"
-            )
-            .value
-            .trim();
-
-
-    const local =
-        document
-            .getElementById(
-                "local"
-            )
-            .value
-            .trim();
-
-
-    const prioridade =
-        document
-            .getElementById(
-                "prioridade"
-            )
-            .value;
-
-
-    const status =
-        document
-            .getElementById(
-                "status"
-            )
-            .value;
-
-
-    if (!data) {
-
-        alert(
-            "Escolha a data da atividade."
-        );
-
-        return;
-
-    }
-
-
-   if (
-    !data ||
-    !atividade ||
-    !tecnico ||
-    !local ||
-    !prioridade ||
-    !status
+function respostaTecnicos(
+  tecnicos,
+  mensagem
 ) {
 
-    alert(
-        "Preencha todos os campos da atividade."
+  return ContentService
+    .createTextOutput(
+      JSON.stringify({
+
+        sucesso: true,
+
+        mensagem:
+          mensagem || "",
+
+        tecnicos:
+          tecnicos
+
+      })
+    )
+    .setMimeType(
+      ContentService.MimeType.JSON
+    );
+}
+
+
+function respostaTecnico(
+  tecnico,
+  mensagem
+) {
+
+  return ContentService
+    .createTextOutput(
+      JSON.stringify({
+
+        sucesso: true,
+
+        mensagem:
+          mensagem || "",
+
+        tecnico:
+          tecnico
+
+      })
+    )
+    .setMimeType(
+      ContentService.MimeType.JSON
+    );
+}
+
+
+function erro(mensagem) {
+
+  return ContentService
+    .createTextOutput(
+      JSON.stringify({
+
+        sucesso: false,
+
+        mensagem:
+          mensagem,
+
+        atividades:
+          []
+
+      })
+    )
+    .setMimeType(
+      ContentService.MimeType.JSON
+    );
+}
+
+
+/* =========================================================
+   GET / POST
+========================================================= */
+
+function doGet() {
+
+  try {
+
+    return resposta(
+      listarAtividades(),
+      "Dados carregados."
     );
 
-    return;
+  } catch (e) {
 
+    return erro(
+      "Erro ao carregar dados: " +
+      e.message
+    );
+  }
 }
 
 
-    const botao =
-        document.getElementById(
-            "btnSalvar"
-        );
-
-
-    botao.disabled =
-        true;
-
-
-    try {
-
-        setStatusConexao(
-            idEditando !== null
-                ? "Salvando alteração..."
-                : "Salvando atividade...",
-            "aviso"
-        );
-
-
-        const payload = {
-
-            acao:
-                idEditando !== null
-                    ? "editar"
-                    : "adicionar",
-
-            token:
-                token,
-
-            id:
-                idEditando !== null
-                    ? idEditando
-                    : "",
-
-            data:
-                data,
-
-            atividade:
-                atividade,
-
-            tecnico:
-                tecnico,
-
-            local:
-                local,
-
-            prioridade:
-                prioridade,
-
-            status:
-                status
-
-        };
-
-
-        const retorno =
-            await apiPost(
-                payload
-            );
-
-
-        if (!retorno.sucesso) {
-
-            throw new Error(
-                retorno.erro ||
-                retorno.message ||
-                retorno.mensagem ||
-                "Não foi possível salvar."
-            );
-
-        }
-
-
-        cancelarEdicao();
-
-
-        await sincronizar();
-
-
-        setStatusConexao(
-            "✓ Atividade salva na Google Planilha.",
-            "sucesso"
-        );
-
-
-    } catch (erro) {
-
-        console.error(
-            erro
-        );
-
-
-        if (
-            String(
-                erro.message
-            )
-            .toLowerCase()
-            .includes("sessão")
-        ) {
-
-            sair();
-
-        }
-
-
-        alert(
-            "Não foi possível salvar na planilha.\n\n" +
-            erro.message
-        );
-
-
-        setStatusConexao(
-            "⚠ Erro ao salvar na planilha.",
-            "erro"
-        );
-
-
-    } finally {
-
-        botao.disabled =
-            false;
-
-    }
-
-}
-
-
-/* =========================================================
-   EDITAR ATIVIDADE
-========================================================= */
-
-function editarAtividade(id) {
-
-    if (!estaLogado()) {
-
-        abrirLogin();
-
-        return;
-
-    }
-
-
-    const x =
-        atividades.find(
-            function(a) {
-
-                return String(a.id) ===
-                    String(id);
-
-            }
-        );
-
-
-    if (!x)
-        return;
-
-
-    idEditando =
-        x.id;
-
-
-    document
-        .getElementById(
-            "data"
-        )
-        .value =
-        x.data;
-
-
-    document
-        .getElementById(
-            "atividade"
-        )
-        .value =
-        x.atividade;
-
-
-    document
-        .getElementById(
-            "tecnico"
-        )
-        .value =
-        x.tecnico;
-
-
-    document
-        .getElementById(
-            "local"
-        )
-        .value =
-        x.local || "";
-
-
-    document
-        .getElementById(
-            "prioridade"
-        )
-        .value =
-        x.prioridade ||
-        "Média";
-
-
-    document
-        .getElementById(
-            "status"
-        )
-        .value =
-        x.status ||
-        "Planejado";
-
-
-    document
-        .getElementById(
-            "btnSalvar"
-        )
-        .innerText =
-        "Salvar alterações";
-
-
-    document
-        .getElementById(
-            "btnCancelar"
-        )
-        .style.display =
-        "inline-block";
-
-
-    document
-        .getElementById(
-            "atividade"
-        )
-        .focus();
-
-
-    renderizar();
-
-}
-
-
-/* =========================================================
-   EXCLUIR
-========================================================= */
-
-async function excluirAtividade(id) {
-
-    if (!estaLogado()) {
-
-        abrirLogin();
-
-        return;
-
+function doPost(e) {
+
+  const lock =
+    LockService.getScriptLock();
+
+  try {
+
+    lock.waitLock(30000);
+
+    const dados =
+      JSON.parse(
+        (
+          e.postData &&
+          e.postData.contents
+        ) || "{}"
+      );
+
+    const acao =
+      String(
+        dados.acao || ""
+      );
+
+
+    /*
+     * Consultas da área de técnicos.
+     * Não alteram a agenda.
+     */
+
+    if (
+      acao ===
+      "listarTecnicos"
+    ) {
+
+      return respostaTecnicos(
+        listarTecnicos(),
+        "Técnicos carregados."
+      );
     }
 
 
     if (
-        !confirm(
-            "Deseja excluir esta atividade?"
-        )
+      acao ===
+      "buscarTecnico"
     ) {
 
-        return;
-
+      return respostaTecnico(
+        buscarTecnico(
+          dados.aba
+        ),
+        "Técnico carregado."
+      );
     }
 
 
-    try {
-
-        setStatusConexao(
-            "Excluindo atividade...",
-            "aviso"
-        );
-
-
-        const retorno =
-            await apiPost({
-
-                acao:
-                    "excluir",
-
-                token:
-                    token,
-
-                id:
-                    id
-
-            });
-
-
-        if (!retorno.sucesso) {
-
-            throw new Error(
-                retorno.erro ||
-                retorno.message ||
-                retorno.mensagem ||
-                "Não foi possível excluir."
-            );
-
-        }
-
-
-        await sincronizar();
-
-
-        setStatusConexao(
-            "✓ Atividade excluída da planilha.",
-            "sucesso"
-        );
-
-
-    } catch (erro) {
-
-        console.error(
-            erro
-        );
-
-
-        if (
-            String(
-                erro.message
-            )
-            .toLowerCase()
-            .includes("sessão")
-        ) {
-
-            sair();
-
-        }
-
-
-        alert(
-            "Não foi possível excluir na planilha.\n\n" +
-            erro.message
-        );
-
-
-        setStatusConexao(
-            "⚠ Erro ao excluir na planilha.",
-            "erro"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   RENDERIZAÇÃO DA SEMANA
-========================================================= */
-
-function renderizar() {
-
-    const inicio =
-        inicioSemana(
-            dataReferencia
-        );
-
-
-    const dias = [
-
-        [
-            "Segunda",
-            "dataSegunda"
-        ],
-
-        [
-            "Terça",
-            "dataTerca"
-        ],
-
-        [
-            "Quarta",
-            "dataQuarta"
-        ],
-
-        [
-            "Quinta",
-            "dataQuinta"
-        ],
-
-        [
-            "Sexta",
-            "dataSexta"
-        ],
-
-        [
-            "Sábado",
-            "dataSabado"
-        ],
-
-        [
-            "Domingo",
-            "dataDomingo"
-        ]
-
-    ];
-
-
-    const ft =
-        document
-            .getElementById(
-                "filtroTecnico"
-            )
-            .value;
-
-
-    const fs =
-        document
-            .getElementById(
-                "filtroStatus"
-            )
-            .value;
-
-
-    const pesquisa =
-        document
-            .getElementById(
-                "pesquisa"
-            )
-            .value
-            .toLowerCase()
-            .trim();
-
-
-    dias.forEach(
-        function(d, i) {
-
-            let data =
-                new Date(
-                    inicio
-                );
-
-
-            data.setDate(
-                inicio.getDate() +
-                i
-            );
-
-
-            document
-                .getElementById(
-                    d[0]
-                )
-                .innerHTML =
-                "";
-
-
-            document
-                .getElementById(
-                    d[1]
-                )
-                .innerText =
-                formatarData(
-                    data
-                );
-
-
-            let lista =
-                atividades.filter(
-                    function(x) {
-
-                        return (
-
-                            x.data ===
-                            dataISO(data)
-
-                            &&
-
-                            (
-                                !ft ||
-                                x.tecnico === ft
-                            )
-
-                            &&
-
-                            (
-                                !fs ||
-                                x.status === fs
-                            )
-
-                            &&
-
-                            (
-                                !pesquisa ||
-
-                                (
-                                    x.atividade +
-                                    " " +
-                                    x.tecnico +
-                                    " " +
-                                    (x.local || "")
-                                )
-                                .toLowerCase()
-                                .includes(
-                                    pesquisa
-                                )
-                            )
-
-                        );
-
-                    }
-                );
-
-
-            const area =
-                document.getElementById(
-                    d[0]
-                );
-
-
-            if (!lista.length) {
-
-                area.innerHTML =
-                    '<div class="vazio">' +
-                    'Nenhuma atividade' +
-                    '</div>';
-
-                return;
-
-            }
-
-
-            lista.forEach(
-                function(x) {
-
-                    let div =
-                        document.createElement(
-                            "div"
-                        );
-
-
-                    div.className =
-                        "atividade";
-
-
-                    if (
-                        String(x.id) ===
-                        String(idEditando)
-                    ) {
-
-                        div.classList.add(
-                            "editando"
-                        );
-
-                    }
-
-
-                    let st = {
-
-                        "Planejado":
-                            "planejado",
-
-                        "Em andamento":
-                            "andamento",
-
-                        "Concluído":
-                            "concluido",
-
-                        "Pendente":
-                            "pendente"
-
-                    }[
-                        x.status
-                    ] || "";
-
-
-                    let pc = {
-
-                        "Alta":
-                            "alta",
-
-                        "Média":
-                            "media",
-
-                        "Baixa":
-                            "baixa"
-
-                    }[
-                        x.prioridade ||
-                        "Média"
-                    ];
-
-
-                    let botoes =
-                        estaLogado()
-
-                            ? `
-
-                                <button
-                                    class="btn-editar"
-                                    onclick="editarAtividade('${String(x.id).replace(/'/g, "\\'")}')">
-
-                                    Editar
-
-                                </button>
-
-                                <button
-                                    class="btn-excluir"
-                                    onclick="excluirAtividade('${String(x.id).replace(/'/g, "\\'")}')">
-
-                                    Excluir
-
-                                </button>
-
-                            `
-
-                            : "";
-
-
-                    div.innerHTML =
-
-                        `<strong>
-                            ${esc(x.atividade)}
-                        </strong>
-
-                        <div class="tecnico">
-                            👷 Técnico:
-                            ${esc(x.tecnico)}
-                        </div>
-
-                        ${
-                            x.local
-                                ? `
-                                    <div class="local">
-                                        📍 ${esc(x.local)}
-                                    </div>
-                                  `
-                                : ""
-                        }
-
-                        <div class="prioridade ${pc}">
-                            ● Prioridade:
-                            ${esc(
-                                x.prioridade ||
-                                "Média"
-                            )}
-                        </div>
-
-                        <br>
-
-                        <span class="status ${st}">
-                            ${esc(
-                                x.status
-                            )}
-                        </span>
-
-                        <br>
-
-                        ${botoes}`;
-
-
-                    area.appendChild(
-                        div
-                    );
-
-                }
-            );
-
-        }
-    );
-
-
-    /* MOSTRA QUAL SEMANA ESTÁ SENDO VISUALIZADA */
-
-    let fim =
-        new Date(
-            inicio
-        );
-
-
-    fim.setDate(
-        inicio.getDate() +
-        6
-    );
-
-
-    document
-        .getElementById(
-            "semanaInfo"
-        )
-        .innerText =
-
-        "Semana: " +
-        formatarData(inicio) +
-        " até " +
-        formatarData(fim);
-
-    
-    atualizarResumo();
-
-}
-
-
-/* =========================================================
-   RESUMO
-========================================================= */
-
-function atualizarResumo() {
-
-    document
-        .getElementById(
-            "total"
-        )
-        .innerText =
-        atividades.length;
-
-
-    document
-        .getElementById(
-            "planejados"
-        )
-        .innerText =
-
-        atividades.filter(
-            function(x) {
-
-                return x.status ===
-                    "Planejado";
-
-            }
-        ).length;
-
-
-    document
-        .getElementById(
-            "andamento"
-        )
-        .innerText =
-
-        atividades.filter(
-            function(x) {
-
-                return x.status ===
-                    "Em andamento";
-
-            }
-        ).length;
-
-
-    document
-        .getElementById(
-            "concluidos"
-        )
-        .innerText =
-
-        atividades.filter(
-            function(x) {
-
-                return x.status ===
-                    "Concluído";
-
-            }
-        ).length;
-
-
-    document
-        .getElementById(
-            "pendentes"
-        )
-        .innerText =
-
-        atividades.filter(
-            function(x) {
-
-                return x.status ===
-                    "Pendente";
-
-            }
-        ).length;
-
-}
-
-
-/* =========================================================
-   FILTRO DE TÉCNICOS
-========================================================= */
-
-function atualizarFiltroTecnicos() {
-
-    const select =
-        document.getElementById(
-            "filtroTecnico"
-        );
-
-
-    const atual =
-        select.value;
-
-
-    const tecnicos =
-
-        [
-            ...new Set(
-
-                atividades
-
-                    .map(
-                        function(x) {
-
-                            return x.tecnico;
-
-                        }
-                    )
-
-                    .filter(Boolean)
-
-            )
-        ]
-
-        .sort(
-            function(a, b) {
-
-                return a.localeCompare(
-                    b
-                );
-
-            }
-        );
-
-
-    select.innerHTML =
-        '<option value="">' +
-        'Todos os técnicos' +
-        '</option>';
-
-
-    tecnicos.forEach(
-        function(x) {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-
-            option.value =
-                x;
-
-            option.textContent =
-                x;
-
-
-            select.appendChild(
-                option
-            );
-
-        }
-    );
-
-
-    select.value =
-        atual;
-
-}
-
-
-/* =========================================================
-   NAVEGAÇÃO ENTRE SEMANAS
-========================================================= */
-
-function semanaAnterior() {
-
-    dataReferencia.setDate(
-        dataReferencia.getDate() -
-        7
-    );
-
-
-    renderizar();
-
-}
-
-
-function proximaSemana() {
-
-    dataReferencia.setDate(
-        dataReferencia.getDate() +
-        7
-    );
-
-
-    renderizar();
-
-}
-
-
-function irParaHoje() {
-
-    dataReferencia =
-        new Date();
-
-
-    renderizar();
-
-}
-
-
-/* =========================================================
-   ESCAPE DE HTML
-========================================================= */
-
-function esc(v) {
-
-    return String(
-        v ?? ""
-    )
-    .replace(
-        /[&<>"']/g,
-        function(c) {
-
-            return {
-
-                "&":
-                    "&amp;",
-
-                "<":
-                    "&lt;",
-
-                ">":
-                    "&gt;",
-
-                '"':
-                    "&quot;",
-
-                "'":
-                    "&#039;"
-
-            }[c];
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   EXPORTAR CSV
-========================================================= */
-
-function exportarCSV() {
-
-    if (!atividades.length) {
-
-        alert(
-            "Não há atividades para exportar."
-        );
-
-        return;
-
-    }
-
-
-    let linhas = [
-
-        [
-            "ID",
-            "Data",
-            "Atividade",
-            "Técnico",
-            "Local",
-            "Prioridade",
-            "Status"
-        ],
-
-        ...atividades.map(
-            function(x) {
-
-                return [
-
-                    x.id,
-
-                    x.data,
-
-                    x.atividade,
-
-                    x.tecnico,
-
-                    x.local || "",
-
-                    x.prioridade ||
-                        "Média",
-
-                    x.status
-
-                ];
-
-            }
-        )
-
-    ];
-
-
-    let csv =
-
-        linhas
-
-            .map(
-                function(l) {
-
-                    return l
-
-                        .map(
-                            function(v) {
-
-                                return '"' +
-                                    String(v)
-                                    .replace(
-                                        /"/g,
-                                        '""'
-                                    ) +
-                                    '"';
-
-                            }
-                        )
-
-                        .join(";");
-
-                }
-            )
-
-            .join("\n");
-
-
-    let a =
-        document.createElement(
-            "a"
-        );
-
-
-    a.href =
-        URL.createObjectURL(
-
-            new Blob(
-                [
-                    "\ufeff" +
-                    csv
-                ],
-
-                {
-                    type:
-                        "text/csv;charset=utf-8"
-                }
-            )
-
-        );
-
-
-    a.download =
-        "agenda_inspetor.csv";
-
-
-    a.click();
-
-}
-
-
-/* =========================================================
-   LIMPAR AGENDA
-========================================================= */
-
-async function limparAgenda() {
-
-    if (!estaLogado()) {
-
-        abrirLogin();
-
-        return;
-
-    }
-
-
-    if (!atividades.length)
-        return;
+    /*
+     * Operações existentes da agenda.
+     */
+
+    const aba =
+      obterAba();
 
 
     if (
-        !confirm(
-            "Isso apagará TODAS as atividades da Google Planilha. Continuar?"
-        )
+      acao ===
+      "adicionar"
     ) {
 
-        return;
+      const item =
+        normalizarAtividade(
+          dados.atividade
+        );
 
+      if (
+        !item.data ||
+        !item.atividade ||
+        !item.tecnico
+      ) {
+
+        return erro(
+          "Data, atividade e técnico são obrigatórios."
+        );
+      }
+
+      aba.appendRow([
+
+        item.id,
+        item.data,
+        item.atividade,
+        item.tecnico,
+        item.local,
+        item.prioridade,
+        item.status
+
+      ]);
+
+      return resposta(
+        listarAtividades(),
+        "Atividade adicionada."
+      );
     }
 
 
-    try {
+    if (
+      acao ===
+      "editar"
+    ) {
 
-        setStatusConexao(
-            "Limpando agenda na planilha...",
-            "aviso"
+      const item =
+        normalizarAtividade(
+          dados.atividade
         );
 
+      const valores =
+        aba
+          .getDataRange()
+          .getValues();
 
-        const retorno =
-            await apiPost({
-
-                acao:
-                    "limpar",
-
-                token:
-                    token
-
-            });
-
-
-        if (!retorno.sucesso) {
-
-            throw new Error(
-                retorno.erro ||
-                retorno.message ||
-                retorno.mensagem ||
-                "Não foi possível limpar."
-            );
-
-        }
-
-
-        await sincronizar();
-
-        cancelarEdicao();
-
-
-        setStatusConexao(
-            "✓ Agenda limpa na Google Planilha.",
-            "sucesso"
-        );
-
-
-    } catch (erro) {
-
-        console.error(
-            erro
-        );
-
+      for (
+        let i = 1;
+        i < valores.length;
+        i++
+      ) {
 
         if (
-            String(
-                erro.message
-            )
-            .toLowerCase()
-            .includes("sessão")
+          String(
+            valores[i][0]
+          ) ===
+          String(
+            item.id
+          )
         ) {
 
-            sair();
+          aba
+            .getRange(
+              i + 1,
+              1,
+              1,
+              CABECALHO.length
+            )
+            .setValues([[
+              item.id,
+              item.data,
+              item.atividade,
+              item.tecnico,
+              item.local,
+              item.prioridade,
+              item.status
+            ]]);
 
+          return resposta(
+            listarAtividades(),
+            "Atividade alterada."
+          );
         }
+      }
 
-
-        alert(
-            "Não foi possível limpar a planilha.\n\n" +
-            erro.message
-        );
-
-
-        setStatusConexao(
-            "⚠ Erro ao limpar a planilha.",
-            "erro"
-        );
-
+      return erro(
+        "Atividade não encontrada."
+      );
     }
 
+
+    if (
+      acao ===
+      "excluir"
+    ) {
+
+      const id =
+        String(
+          dados.id || ""
+        );
+
+      const valores =
+        aba
+          .getDataRange()
+          .getValues();
+
+      for (
+        let i =
+          valores.length - 1;
+        i >= 1;
+        i--
+      ) {
+
+        if (
+          String(
+            valores[i][0]
+          ) ===
+          id
+        ) {
+
+          aba.deleteRow(
+            i + 1
+          );
+
+          return resposta(
+            listarAtividades(),
+            "Atividade excluída."
+          );
+        }
+      }
+
+      return erro(
+        "Atividade não encontrada."
+      );
+    }
+
+
+    if (
+      acao ===
+      "limpar"
+    ) {
+
+      const ultimaLinha =
+        aba.getLastRow();
+
+      if (
+        ultimaLinha >= 2
+      ) {
+
+        aba
+          .getRange(
+            2,
+            1,
+            ultimaLinha - 1,
+            CABECALHO.length
+          )
+          .clearContent();
+      }
+
+      return resposta(
+        [],
+        "Agenda limpa."
+      );
+    }
+
+
+    return erro(
+      "Ação inválida."
+    );
+
+  } catch (e) {
+
+    return erro(
+      "Erro no servidor: " +
+      e.message
+    );
+
+  } finally {
+
+    try {
+      lock.releaseLock();
+    } catch (_) {}
+  }
 }
-
-
-/* =========================================================
-   ENTER NO LOGIN
-========================================================= */
-
-document
-    .getElementById(
-        "loginSenha"
-    )
-    .addEventListener(
-        "keydown",
-        function(e) {
-
-            if (
-                e.key ===
-                "Enter"
-            ) {
-
-                login();
-
-            }
-
-        }
-    );
-
-
-/* =========================================================
-   FECHAR LOGIN CLICANDO FORA
-========================================================= */
-
-document
-    .getElementById(
-        "modalTecnico"
-    )
-    .addEventListener(
-        "click",
-        function(e) {
-            if (e.target === this) {
-                fecharDetalhesTecnico();
-            }
-        }
-    );
-
-
-document
-    .getElementById(
-        "modalLogin"
-    )
-    .addEventListener(
-        "click",
-        function(e) {
-
-            if (
-                e.target === this
-            ) {
-
-                fecharLogin();
-
-            }
-
-        }
-    );
-
-
-/* =========================================================
-   INICIALIZAÇÃO
-========================================================= */
-
-document
-    .getElementById(
-        "data"
-    )
-    .value =
-    dataISO(
-        new Date()
-    );
-
-
-carregarCacheLocal();
-
-atualizarFiltroTecnicos();
-
-atualizarInterfaceLogin();
-
-renderizar();
-
-sincronizar();
-
-
-/* =========================================================
-   SINCRONIZAÇÃO AUTOMÁTICA
-========================================================= */
-
-setInterval(
-    sincronizar,
-    30000
-);
-
-
-/* =========================================================
-   ATUALIZA AO VOLTAR PARA A ABA
-========================================================= */
-
-document.addEventListener(
-    "visibilitychange",
-    function() {
-
-        if (!document.hidden) {
-
-            sincronizar();
-
-        }
-
-    }
-);
-
-</script>
-
-</body>
-
-</html>
