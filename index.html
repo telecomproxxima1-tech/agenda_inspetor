@@ -520,13 +520,83 @@ button:disabled {
 @media(max-width:800px){.tecnicos-filtros{grid-template-columns:1fr}.tecnico-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.tecnicos-kpis{grid-template-columns:1fr 1fr}.tecnico-grid{grid-template-columns:1fr}.tecnicos-topo{align-items:flex-start}.tecnico-kpi{padding:12px}.kpi-numero{font-size:19px}}
 
-.tabela-ferramentas{width:100%;border-collapse:collapse}
-.tabela-ferramentas th,.tabela-ferramentas td{border:1px solid #e1e6e9;padding:8px;font-size:12px;text-align:left}
-.tabela-ferramentas th{background:#f5f7f9}
+/* =========================================================
+   TABELA DE INSPEÇÕES — ITEM FIXO + INSPEÇÕES SEPARADAS
+========================================================= */
+.tabela-ferramentas-wrap{
+    width:100%;
+    overflow-x:auto;
+    border:1px solid #e1e6e9;
+    border-radius:10px;
+    background:#fff;
+}
+.tabela-ferramentas{
+    width:max-content;
+    min-width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+}
+.tabela-ferramentas th,
+.tabela-ferramentas td{
+    border-right:1px solid #e1e6e9;
+    border-bottom:1px solid #e1e6e9;
+    padding:9px 10px;
+    font-size:12px;
+    text-align:center;
+    white-space:nowrap;
+    vertical-align:middle;
+}
+.tabela-ferramentas th{
+    background:#f5f7f9;
+    color:#455a64;
+    font-weight:800;
+}
+.tabela-ferramentas .col-item{
+    position:sticky;
+    left:0;
+    z-index:3;
+    min-width:190px;
+    max-width:260px;
+    text-align:left;
+    background:#fff;
+    box-shadow:4px 0 8px rgba(38,50,56,.06);
+}
+.tabela-ferramentas thead .col-item{
+    background:#eef5fb;
+    z-index:5;
+}
+.tabela-ferramentas .grupo-inspecao{
+    min-width:150px;
+    background:#eef5fb;
+    color:#1565c0;
+    border-bottom:1px solid #d7e8f6;
+}
+.tabela-ferramentas .sub-inspecao{
+    min-width:105px;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+}
+.tabela-ferramentas tbody tr:hover td{background:#fafcff}
+.tabela-ferramentas tbody tr:hover .col-item{background:#f7fbff}
+.tabela-ferramentas tbody tr:last-child td{border-bottom:0}
+.tabela-ferramentas th:last-child,
+.tabela-ferramentas td:last-child{border-right:0}
+.tabela-ferramentas .valor-inspecao{font-weight:700;color:#37474f}
+.tabela-ferramentas .data-inspecao{color:#607d8b}
+.tabela-ferramentas .sem-dado{color:#b0bec5;font-weight:600}
+.inspecoes-legenda{margin:0 0 9px;color:#78909c;font-size:11px}
+@media(max-width:700px){
+    .tabela-ferramentas .col-item{min-width:155px}
+    .tabela-ferramentas th,.tabela-ferramentas td{padding:8px}
+}
 .tecnico-carregando{padding:30px;text-align:center;color:#607d8b}
 @media(max-width:800px){.tecnicos-filtros{grid-template-columns:1fr}.tecnico-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.tecnico-grid{grid-template-columns:1fr}}
 
+
+/* POWER METER */
+.pm-acoes-topo{display:flex;gap:8px;flex-wrap:wrap}.pm-filtros{margin-top:16px}.pm-filtros-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr;gap:12px;align-items:end}.pm-status-box{padding:12px;border-radius:10px;background:#f4f6f8;color:#455a64;font-size:13px;min-height:18px}.pm-tabela-painel{margin-top:16px}.pm-tabela-wrap{overflow:auto;max-height:65vh;border:1px solid #d9e0e5;border-radius:10px}.pm-tabela{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:12px;background:#fff}.pm-tabela th,.pm-tabela td{padding:9px 10px;border-right:1px solid #dfe5e9;border-bottom:1px solid #dfe5e9;white-space:nowrap}.pm-tabela th{position:sticky;top:0;background:#263238;color:#fff;z-index:2;text-align:left}.pm-tabela tbody tr:nth-child(even){background:#f8fafb}.pm-tabela tbody tr:hover{background:#eef5f8}.pm-tabela th:first-child,.pm-tabela td:first-child{position:sticky;left:0;z-index:3;background:inherit}.pm-tabela th:first-child{z-index:4}.pm-num{text-align:right;font-variant-numeric:tabular-nums}.pm-situacao{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:700;font-size:11px}.pm-vencido{background:#ffebee;color:#b71c1c}.pm-proximo{background:#fff3e0;color:#e65100}.pm-ok{background:#e8f5e9;color:#2e7d32}.pm-acao{display:flex;gap:5px}.pm-acao button{border:0;border-radius:7px;padding:6px 9px;cursor:pointer}.pm-editar{background:#e3f2fd;color:#1565c0}.pm-excluir{background:#ffebee;color:#c62828}.pm-modal{width:min(760px,94vw)}.pm-modal-topo{display:flex;justify-content:space-between;align-items:flex-start;gap:15px}.pm-form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}.pm-form-grid input{width:100%;box-sizing:border-box}.pm-form-info{margin-top:14px;padding:10px;border-radius:8px;background:#f5f7f9;color:#546e7a;font-size:12px}@media(max-width:900px){.pm-filtros-grid{grid-template-columns:1fr 1fr}.pm-form-grid{grid-template-columns:1fr}}@media(max-width:600px){.pm-filtros-grid{grid-template-columns:1fr}}
 </style>
 
 </head>
@@ -542,7 +612,7 @@ button:disabled {
         <div>
 
             <h1>
-                📋 Página do Inspetor
+                📋 Agenda de Atividades do Inspetor
             </h1>
 
             <div class="subtitulo">
@@ -602,6 +672,12 @@ button:disabled {
                 class="aba-inspetor"
                 onclick="abrirAbaInspetor('tecnicos')">
             👷 Técnicos
+        </button>
+
+        <button id="abaPowerMeter"
+                class="aba-inspetor"
+                onclick="abrirAbaInspetor('powerMeter')">
+            📡 Power Meter
         </button>
 
     </div>
@@ -1276,6 +1352,46 @@ button:disabled {
     </div>
 
 
+    <!-- ÁREA POWER METER -->
+    <div id="powerMeterView" class="view-inspetor oculto">
+        <div class="tecnicos-dashboard power-meter-dashboard">
+            <div class="painel" style="margin-bottom:0">
+                <div class="tecnicos-topo">
+                    <div class="tecnicos-titulo">
+                        <div class="tecnicos-icone">📡</div>
+                        <div><h2>Controle de Aferição — Power Meter</h2><div class="subtitulo">Controle exclusivo da unidade Santa Luzia. Alterações são gravadas diretamente na planilha.</div></div>
+                    </div>
+                    <div class="pm-acoes-topo">
+                        <button class="btn-atualizar-tecnicos" onclick="carregarPowerMeters(true)">🔄 Atualizar</button>
+                        <button class="btn-login" onclick="abrirModalPowerMeter()">➕ Novo Power Meter</button>
+                    </div>
+                </div>
+            </div>
+            <div class="tecnicos-kpis">
+                <div class="tecnico-kpi"><div class="kpi-icone">📡</div><div><div id="pmKpiTotal" class="kpi-numero">0</div><div class="kpi-label">Equipamentos</div></div></div>
+                <div class="tecnico-kpi"><div class="kpi-icone">👷</div><div><div id="pmKpiColaboradores" class="kpi-numero">0</div><div class="kpi-label">Colaboradores</div></div></div>
+                <div class="tecnico-kpi"><div class="kpi-icone">⚠️</div><div><div id="pmKpiVencidos" class="kpi-numero">0</div><div class="kpi-label">Aferições vencidas</div></div></div>
+                <div class="tecnico-kpi"><div class="kpi-icone">⏳</div><div><div id="pmKpiProximos" class="kpi-numero">0</div><div class="kpi-label">Próximas do limite</div></div></div>
+            </div>
+            <div class="painel pm-filtros">
+                <div class="pm-filtros-grid">
+                    <div><label>Pesquisar</label><input id="pmPesquisa" type="search" placeholder="Modelo, colaborador ou patrimônio..." oninput="filtrarPowerMeters()"></div>
+                    <div><label>Responsável</label><select id="pmFiltroResponsavel" onchange="filtrarPowerMeters()"><option value="">Todos</option></select></div>
+                    <div><label>Situação</label><select id="pmFiltroSituacao" onchange="filtrarPowerMeters()"><option value="">Todas</option><option value="Vencido">Vencido</option><option value="Próximo do limite">Próximo do limite</option><option value="Em dia">Em dia</option></select></div>
+                    <div class="pm-status-box" id="statusPowerMeter">Dados ainda não carregados.</div>
+                </div>
+            </div>
+            <div class="painel pm-tabela-painel">
+                <div class="pm-tabela-wrap">
+                    <table class="pm-tabela">
+                        <thead><tr><th>Nº</th><th>Marca/Modelo</th><th>Nome Colaborador</th><th>Patrimônio PXX</th><th>Sinal Padrão</th><th>Sinal Encontrado</th><th>Diferença Admitida</th><th>Data da aferição</th><th>Início da Próxima Aferição</th><th>Limite da Próxima Aferição</th><th>Dias Restantes</th><th>Responsável pela Calibração</th><th>Ação</th></tr></thead>
+                        <tbody id="listaPowerMeters"><tr><td colspan="13" class="tecnico-vazio">Clique em “Power Meter” para carregar os dados.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ÁREA DE TÉCNICOS -->
 
     <div id="tecnicosView" class="view-inspetor oculto">
@@ -1411,6 +1527,26 @@ button:disabled {
 </div>
 
 
+<!-- MODAL POWER METER -->
+<div id="modalPowerMeter" class="modal oculto">
+  <div class="login-caixa pm-modal">
+    <div class="pm-modal-topo"><div><h2 id="pmModalTitulo">📡 Novo Power Meter</h2><div class="subtitulo">Aba: Santa Luzia</div></div><button class="btn-secundario" onclick="fecharModalPowerMeter()">Fechar</button></div>
+    <input type="hidden" id="pmId">
+    <div class="pm-form-grid">
+      <div><label>Nº</label><input id="pmNumero" type="number" min="1"></div>
+      <div><label>Marca/Modelo</label><input id="pmModelo" type="text"></div>
+      <div><label>Nome Colaborador</label><input id="pmColaborador" type="text"></div>
+      <div><label>Patrimônio PXX</label><input id="pmPatrimonio" type="number"></div>
+      <div><label>Sinal Padrão</label><input id="pmPadrao" type="number" step="0.01"></div>
+      <div><label>Sinal Encontrado</label><input id="pmEncontrado" type="number" step="0.01"></div>
+      <div><label>Data da aferição</label><input id="pmData" type="date"></div>
+      <div><label>Responsável pela Calibração</label><input id="pmResponsavel" type="text"></div>
+    </div>
+    <div class="pm-form-info">Os campos <b>Diferença Admitida</b>, <b>Início</b>, <b>Limite</b> e <b>Dias Restantes</b> seguem as fórmulas da planilha Santa Luzia.</div>
+    <div class="login-botoes"><button class="btn-secundario" onclick="fecharModalPowerMeter()">Cancelar</button><button class="btn-login" onclick="salvarPowerMeter()">💾 Salvar na planilha</button></div>
+  </div>
+</div>
+
 <!-- MODAL LOGIN -->
 
 <div
@@ -1520,23 +1656,20 @@ let tecnicosInspetor = [];
 let tecnicosCarregados = false;
 
 async function abrirAbaInspetor(aba) {
-
-    const agendaView = document.getElementById("agendaView");
-    const tecnicosView = document.getElementById("tecnicosView");
-    const abaAgenda = document.getElementById("abaAgenda");
-    const abaTecnicos = document.getElementById("abaTecnicos");
-
-    const mostrarTecnicos = aba === "tecnicos";
-
-    agendaView.classList.toggle("oculto", mostrarTecnicos);
-    tecnicosView.classList.toggle("oculto", !mostrarTecnicos);
-
-    abaAgenda.classList.toggle("ativa", !mostrarTecnicos);
-    abaTecnicos.classList.toggle("ativa", mostrarTecnicos);
-
-    if (mostrarTecnicos && !tecnicosCarregados) {
-        await carregarTecnicosInspetor();
-    }
+    const agendaView=document.getElementById('agendaView');
+    const tecnicosView=document.getElementById('tecnicosView');
+    const pmView=document.getElementById('powerMeterView');
+    const abaAgenda=document.getElementById('abaAgenda');
+    const abaTecnicos=document.getElementById('abaTecnicos');
+    const abaPM=document.getElementById('abaPowerMeter');
+    agendaView.classList.toggle('oculto',aba!=='agenda');
+    tecnicosView.classList.toggle('oculto',aba!=='tecnicos');
+    pmView.classList.toggle('oculto',aba!=='powerMeter');
+    abaAgenda.classList.toggle('ativa',aba==='agenda');
+    abaTecnicos.classList.toggle('ativa',aba==='tecnicos');
+    abaPM.classList.toggle('ativa',aba==='powerMeter');
+    if(aba==='tecnicos' && !tecnicosCarregados) await carregarTecnicosInspetor();
+    if(aba==='powerMeter') await carregarPowerMeters();
 }
 
 async function carregarTecnicosInspetor(forcar = false) {
@@ -1890,54 +2023,111 @@ function renderizarDetalhesTecnico(t) {
 
         ferramentasHtml = `
             <div class="tecnico-carregando">
-                Nenhuma ferramenta cadastrada.
+                Nenhum item de ferramenta, EPI ou EPC cadastrado.
             </div>
         `;
 
     } else {
 
-        ferramentasHtml = `
-            <table class="tabela-ferramentas">
+        /*
+         * A primeira coluna fica fixa com o nome do item.
+         * As inspeções ficam separadas em grupos:
+         * Inspeção 1 | Validação | Data
+         * Inspeção 2 | Validação | Data
+         * etc.
+         */
+        const totalInspecoes = Math.max(
+            1,
+            ...ferramentas.map(f =>
+                Array.isArray(f.inspecoes)
+                    ? f.inspecoes.length
+                    : 0
+            )
+        );
 
-                <thead>
-                    <tr>
-                        <th>Ferramenta</th>
-                        <th>Validação</th>
-                        <th>Data da inspeção</th>
-                    </tr>
-                </thead>
+        const cabecalhoInspecoes = Array.from(
+            { length: totalInspecoes },
+            (_, indice) => `
+                <th class="grupo-inspecao" colspan="2">
+                    Inspeção ${indice + 1}
+                </th>
+            `
+        ).join("");
 
-                <tbody>
+        const subCabecalhoInspecoes = Array.from(
+            { length: totalInspecoes },
+            () => `
+                <th class="sub-inspecao">Validação</th>
+                <th class="sub-inspecao">Data</th>
+            `
+        ).join("");
 
-                    ${
-                        ferramentas.map(f => {
+        const linhas = ferramentas.map(f => {
 
-                            if (
-                                !f.inspecoes ||
-                                !f.inspecoes.length
-                            ) {
-                                return `
-                                    <tr>
-                                        <td>${esc(f.nome)}</td>
-                                        <td colspan="2">-</td>
-                                    </tr>
-                                `;
-                            }
+            const inspecoes = Array.isArray(f.inspecoes)
+                ? f.inspecoes
+                : [];
 
-                            return f.inspecoes.map(i => `
-                                <tr>
-                                    <td>${esc(f.nome)}</td>
-                                    <td>${esc(i.validacao || "-")}</td>
-                                    <td>${esc(i.data || "-")}</td>
-                                </tr>
-                            `).join("");
+            const celulasInspecoes = Array.from(
+                { length: totalInspecoes },
+                (_, indice) => {
 
-                        }).join("")
+                    const inspecao = inspecoes[indice];
+
+                    if (!inspecao) {
+                        return `
+                            <td class="sem-dado">—</td>
+                            <td class="sem-dado">—</td>
+                        `;
                     }
 
-                </tbody>
+                    return `
+                        <td class="valor-inspecao">
+                            ${esc(inspecao.validacao || "—")}
+                        </td>
+                        <td class="data-inspecao">
+                            ${esc(inspecao.data || "—")}
+                        </td>
+                    `;
+                }
+            ).join("");
 
-            </table>
+            return `
+                <tr>
+                    <td class="col-item">
+                        <strong>${esc(f.nome || "Item")}</strong>
+                    </td>
+                    ${celulasInspecoes}
+                </tr>
+            `;
+        }).join("");
+
+        ferramentasHtml = `
+            <div class="inspecoes-legenda">
+                A coluna de item permanece fixa; cada inspeção é apresentada separadamente.
+                Deslize horizontalmente para visualizar as inspeções mais antigas.
+            </div>
+
+            <div class="tabela-ferramentas-wrap">
+                <table class="tabela-ferramentas">
+
+                    <thead>
+                        <tr>
+                            <th class="col-item">Ferramentas / EPI / EPC</th>
+                            ${cabecalhoInspecoes}
+                        </tr>
+                        <tr>
+                            <th class="col-item">Item</th>
+                            ${subCabecalhoInspecoes}
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        ${linhas}
+                    </tbody>
+
+                </table>
+            </div>
         `;
     }
 
@@ -2010,6 +2200,84 @@ function escJS(v) {
 }
 
 
+
+/* =========================================================
+   POWER METER — SANTA LUZIA
+========================================================= */
+let powerMeters = [];
+let powerMetersCarregados = false;
+
+async function carregarPowerMeters(forcar=false){
+  const status=document.getElementById('statusPowerMeter');
+  if(!forcar && powerMetersCarregados){ filtrarPowerMeters(); return; }
+  status.textContent='Carregando Power Meters da aba Santa Luzia...';
+  try{
+    const dados=await apiPost({acao:'listarPowerMeters'});
+    if(!dados.sucesso) throw new Error(dados.mensagem||'Erro ao carregar Power Meter.');
+    powerMeters=Array.isArray(dados.powerMeters)?dados.powerMeters:[];
+    powerMetersCarregados=true;
+    preencherFiltroResponsavel();
+    atualizarKpisPowerMeter();
+    filtrarPowerMeters();
+    status.textContent=`${powerMeters.length} registro(s) carregado(s) — planilha: Santa Luzia.`;
+  }catch(e){status.textContent='⚠ '+e.message; document.getElementById('listaPowerMeters').innerHTML=`<tr><td colspan="13" class="tecnico-vazio">${esc(e.message)}</td></tr>`;}
+}
+
+function abrirAbaInspetor(aba){
+  const agendaView=document.getElementById('agendaView'), tecnicosView=document.getElementById('tecnicosView'), pmView=document.getElementById('powerMeterView');
+  const abaAgenda=document.getElementById('abaAgenda'), abaTecnicos=document.getElementById('abaTecnicos'), abaPM=document.getElementById('abaPowerMeter');
+  agendaView.classList.toggle('oculto',aba!=='agenda');
+  tecnicosView.classList.toggle('oculto',aba!=='tecnicos');
+  pmView.classList.toggle('oculto',aba!=='powerMeter');
+  abaAgenda.classList.toggle('ativa',aba==='agenda'); abaTecnicos.classList.toggle('ativa',aba==='tecnicos'); abaPM.classList.toggle('ativa',aba==='powerMeter');
+  if(aba==='tecnicos' && !tecnicosCarregados) carregarTecnicosInspetor();
+  if(aba==='powerMeter') carregarPowerMeters();
+}
+
+function preencherFiltroResponsavel(){
+ const s=document.getElementById('pmFiltroResponsavel'),at=s.value;
+ const nomes=[...new Set(powerMeters.map(x=>x.responsavel).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+ s.innerHTML='<option value="">Todos</option>'+nomes.map(x=>`<option value="${escAttr(x)}">${esc(x)}</option>`).join(''); s.value=at;
+}
+function situacaoPM(x){
+ const d=Number(x.diasRestantes);
+ if(Number.isFinite(d)&&d<0)return 'Vencido';
+ if(Number.isFinite(d)&&d<=15)return 'Próximo do limite';
+ return 'Em dia';
+}
+function atualizarKpisPowerMeter(){
+ document.getElementById('pmKpiTotal').textContent=powerMeters.length;
+ document.getElementById('pmKpiColaboradores').textContent=new Set(powerMeters.map(x=>x.colaborador).filter(Boolean)).size;
+ document.getElementById('pmKpiVencidos').textContent=powerMeters.filter(x=>situacaoPM(x)==='Vencido').length;
+ document.getElementById('pmKpiProximos').textContent=powerMeters.filter(x=>situacaoPM(x)==='Próximo do limite').length;
+}
+function filtrarPowerMeters(){
+ const q=(document.getElementById('pmPesquisa')?.value||'').toLowerCase().trim(), r=document.getElementById('pmFiltroResponsavel')?.value||'', sit=document.getElementById('pmFiltroSituacao')?.value||'';
+ const lista=powerMeters.filter(x=>{const texto=[x.modelo,x.colaborador,x.patrimonio,x.numero].join(' ').toLowerCase(); return (!q||texto.includes(q))&&(!r||x.responsavel===r)&&(!sit||situacaoPM(x)===sit)});
+ renderizarPowerMeters(lista);
+}
+function renderizarPowerMeters(lista){
+ const tbody=document.getElementById('listaPowerMeters');
+ if(!lista.length){tbody.innerHTML='<tr><td colspan="13" class="tecnico-vazio">Nenhum registro encontrado.</td></tr>';return;}
+ tbody.innerHTML=lista.map(x=>{const sit=situacaoPM(x),cls=sit==='Vencido'?'pm-vencido':sit==='Próximo do limite'?'pm-proximo':'pm-ok'; return `<tr><td class="pm-num">${esc(x.numero)}</td><td>${esc(x.modelo)}</td><td>${esc(x.colaborador)}</td><td class="pm-num">${esc(x.patrimonio)}</td><td class="pm-num">${esc(x.sinalPadrao)}</td><td class="pm-num">${esc(x.sinalEncontrado)}</td><td class="pm-num">${esc(x.diferenca)}</td><td>${esc(x.dataAfericao)}</td><td>${esc(x.inicioProxima)}</td><td>${esc(x.limiteProxima)}</td><td class="pm-num"><span class="pm-situacao ${cls}">${esc(x.diasRestantes)} — ${sit}</span></td><td>${esc(x.responsavel)}</td><td><div class="pm-acao"><button class="pm-editar" onclick="editarPowerMeter('${escJS(x.id)}')">Editar</button><button class="pm-excluir" onclick="excluirPowerMeter('${escJS(x.id)}')">Excluir</button></div></td></tr>`;}).join('');
+}
+function abrirModalPowerMeter(item=null){
+ document.getElementById('modalPowerMeter').classList.remove('oculto');
+ document.getElementById('pmModalTitulo').textContent=item?'📡 Editar Power Meter':'📡 Novo Power Meter';
+ document.getElementById('pmId').value=item?item.id:''; document.getElementById('pmNumero').value=item?.numero||''; document.getElementById('pmModelo').value=item?.modelo||''; document.getElementById('pmColaborador').value=item?.colaborador||''; document.getElementById('pmPatrimonio').value=item?.patrimonio||''; document.getElementById('pmPadrao').value=item?.sinalPadrao??''; document.getElementById('pmEncontrado').value=item?.sinalEncontrado??''; document.getElementById('pmData').value=item?.dataAfericaoISO||''; document.getElementById('pmResponsavel').value=item?.responsavel||'';
+}
+function fecharModalPowerMeter(){document.getElementById('modalPowerMeter').classList.add('oculto');}
+function editarPowerMeter(id){const item=powerMeters.find(x=>String(x.id)===String(id)); if(item) abrirModalPowerMeter(item);}
+async function salvarPowerMeter(){
+ const item={id:document.getElementById('pmId').value,numero:document.getElementById('pmNumero').value,modelo:document.getElementById('pmModelo').value.trim(),colaborador:document.getElementById('pmColaborador').value.trim(),patrimonio:document.getElementById('pmPatrimonio').value,sinalPadrao:document.getElementById('pmPadrao').value,sinalEncontrado:document.getElementById('pmEncontrado').value,dataAfericao:document.getElementById('pmData').value,responsavel:document.getElementById('pmResponsavel').value.trim()};
+ if(!item.modelo||!item.colaborador||!item.dataAfericao){alert('Preencha Marca/Modelo, Nome Colaborador e Data da aferição.');return;}
+ try{const dados=await apiPost({acao:item.id?'editarPowerMeter':'adicionarPowerMeter',powerMeter:item}); if(!dados.sucesso)throw new Error(dados.mensagem||'Não foi possível salvar.'); fecharModalPowerMeter(); await carregarPowerMeters(true); alert(dados.mensagem||'Power Meter salvo.');}catch(e){alert('Erro ao salvar: '+e.message);}
+}
+async function excluirPowerMeter(id){
+ const item=powerMeters.find(x=>String(x.id)===String(id)); if(!item)return; if(!confirm(`Excluir o Power Meter nº ${item.numero} da aba Santa Luzia?`))return;
+ try{const dados=await apiPost({acao:'excluirPowerMeter',id:id});if(!dados.sucesso)throw new Error(dados.mensagem||'Não foi possível excluir.');await carregarPowerMeters(true);alert(dados.mensagem||'Registro excluído.');}catch(e){alert('Erro ao excluir: '+e.message);}
+}
+function escAttr(v){return String(v??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 /* =========================================================
    DATAS
