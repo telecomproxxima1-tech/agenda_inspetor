@@ -2226,17 +2226,6 @@ async function carregarPowerMeters(forcar=false){
   }catch(e){status.textContent='⚠ '+e.message; document.getElementById('listaPowerMeters').innerHTML=`<tr><td colspan="13" class="tecnico-vazio">${esc(e.message)}</td></tr>`;}
 }
 
-function abrirAbaInspetor(aba){
-  const agendaView=document.getElementById('agendaView'), tecnicosView=document.getElementById('tecnicosView'), pmView=document.getElementById('powerMeterView');
-  const abaAgenda=document.getElementById('abaAgenda'), abaTecnicos=document.getElementById('abaTecnicos'), abaPM=document.getElementById('abaPowerMeter');
-  agendaView.classList.toggle('oculto',aba!=='agenda');
-  tecnicosView.classList.toggle('oculto',aba!=='tecnicos');
-  pmView.classList.toggle('oculto',aba!=='powerMeter');
-  abaAgenda.classList.toggle('ativa',aba==='agenda'); abaTecnicos.classList.toggle('ativa',aba==='tecnicos'); abaPM.classList.toggle('ativa',aba==='powerMeter');
-  if(aba==='tecnicos' && !tecnicosCarregados) carregarTecnicosInspetor();
-  if(aba==='powerMeter') carregarPowerMeters();
-}
-
 function preencherFiltroResponsavel(){
  const s=document.getElementById('pmFiltroResponsavel'),at=s.value;
  const nomes=[...new Set(powerMeters.map(x=>x.responsavel).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
@@ -2504,16 +2493,31 @@ async function apiPost(payload) {
         token: token || ""
     };
 
-    // Login precisa receber a resposta do servidor, então continua usando JSONP.
-    if (String(payloadSeguro.acao || "") === "login") {
+    /*
+     * IMPORTANTE:
+     * Consultas precisam receber a resposta do Apps Script. Elas usam JSONP
+     * (GET), porque o site está no GitHub Pages e o Apps Script está em outro
+     * domínio.
+     *
+     * Somente operações que ALTERAM a planilha usam o formulário POST em
+     * iframe. Assim, não confundimos "enviei a solicitação" com "recebi os
+     * dados". Isso corrige o carregamento de Técnicos e Power Meter.
+     */
+    const acao = String(payloadSeguro.acao || "");
+
+    const acoesDeLeitura = new Set([
+        "login",
+        "listarAtividades",
+        "listarTecnicos",
+        "buscarTecnico",
+        "listarPowerMeters"
+    ]);
+
+    if (acoesDeLeitura.has(acao)) {
         return await apiJsonp(payloadSeguro);
     }
 
-    /*
-     * Para gravações usamos POST através de um iframe oculto.
-     * Isso evita completamente CORS/fetch/JSONP para operações de escrita
-     * entre o GitHub Pages e o Google Apps Script.
-     */
+    // Adicionar/editar/excluir/limpar usam POST sem fetch/CORS.
     return await apiPostFormulario(payloadSeguro);
 }
 
