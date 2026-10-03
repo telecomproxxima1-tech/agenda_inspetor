@@ -2299,7 +2299,7 @@ async function salvarPowerMeter(){
  const item={id:document.getElementById('pmId').value,numero:document.getElementById('pmNumero').value,modelo:document.getElementById('pmModelo').value.trim(),colaborador:document.getElementById('pmColaborador').value.trim(),patrimonio:document.getElementById('pmPatrimonio').value,sinalPadrao:document.getElementById('pmPadrao').value,sinalEncontrado:document.getElementById('pmEncontrado').value,dataAfericao:document.getElementById('pmData').value,responsavel:document.getElementById('pmResponsavel').value.trim()};
  if(!item.modelo||!item.colaborador||!item.dataAfericao){alert('Preencha Marca/Modelo, Nome Colaborador e Data da aferição.');return;}
  try{
-  const dados=await apiPost({acao:item.id?'editarPowerMeter':'adicionarPowerMeter',powerMeter:item});
+  const dados=await apiPost({acao:item.id?'editarPowerMeter':'adicionarPowerMeter',id:item.id || '',powerMeter:item});
   if(!dados || !dados.sucesso){
     if(dados && /Sessão administrativa/i.test(dados.mensagem||'')){ adminAutenticado=false; atualizarInterfaceLogin(); }
     throw new Error((dados && (dados.mensagem||dados.erro)) || 'Não foi possível salvar.');
@@ -2918,3 +2918,4 @@ document.addEventListener(
 </body>
 
 </html>
+
