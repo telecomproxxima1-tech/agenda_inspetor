@@ -1630,7 +1630,7 @@ button:disabled {
 ========================================================= */
 
 const API_URL =
-    "https://script.google.com/macros/s/AKfycbw0-slVkBwQInaPHBkSF5aG1OhJaUamge2aySd8zpx_fLbkd_CRNTWka2IBLabUDIkG/exec";
+    "https://script.google.com/macros/s/AKfycbwc4E-evaEp8_0jhN3SpHA7mNaooojiNO7sth--e7rKJpBdm2f1MH-4KaOZ2vPW0kfx/exec";
 
 
 let atividades = [];
@@ -1646,6 +1646,8 @@ let sincronizando = false;
 let token =
     sessionStorage.getItem("agendaToken") || "";
 
+// Só libera edição depois que o servidor confirmar a sessão administrativa.
+let adminAutenticado = false;
 
 let usuario =
     sessionStorage.getItem("agendaUsuario") || "";
@@ -2296,12 +2298,29 @@ async function salvarPowerMeter(){
  if(!estaLogado()){ alert('Apenas o usuário administrador logado pode salvar alterações.'); return; }
  const item={id:document.getElementById('pmId').value,numero:document.getElementById('pmNumero').value,modelo:document.getElementById('pmModelo').value.trim(),colaborador:document.getElementById('pmColaborador').value.trim(),patrimonio:document.getElementById('pmPatrimonio').value,sinalPadrao:document.getElementById('pmPadrao').value,sinalEncontrado:document.getElementById('pmEncontrado').value,dataAfericao:document.getElementById('pmData').value,responsavel:document.getElementById('pmResponsavel').value.trim()};
  if(!item.modelo||!item.colaborador||!item.dataAfericao){alert('Preencha Marca/Modelo, Nome Colaborador e Data da aferição.');return;}
- try{const dados=await apiPost({acao:item.id?'editarPowerMeter':'adicionarPowerMeter',powerMeter:item}); if(!dados.sucesso)throw new Error(dados.mensagem||'Não foi possível salvar.'); fecharModalPowerMeter(); await carregarPowerMeters(true); alert(dados.mensagem||'Power Meter salvo.');}catch(e){alert('Erro ao salvar: '+e.message);}
+ try{
+  const dados=await apiPost({acao:item.id?'editarPowerMeter':'adicionarPowerMeter',powerMeter:item});
+  if(!dados || !dados.sucesso){
+    if(dados && /Sessão administrativa/i.test(dados.mensagem||'')){ adminAutenticado=false; atualizarInterfaceLogin(); }
+    throw new Error((dados && (dados.mensagem||dados.erro)) || 'Não foi possível salvar.');
+  }
+  fecharModalPowerMeter();
+  await carregarPowerMeters(true);
+  alert(dados.mensagem||'Power Meter salvo na planilha.');
+}catch(e){alert('Erro ao salvar: '+e.message);}
 }
 async function excluirPowerMeter(id){
  if(!estaLogado()){ alert('Apenas o usuário administrador logado pode excluir registros.'); return; }
  const item=powerMeters.find(x=>String(x.id)===String(id)); if(!item)return; if(!confirm(`Excluir o Power Meter nº ${item.numero} da aba Santa Luzia?`))return;
- try{const dados=await apiPost({acao:'excluirPowerMeter',id:id});if(!dados.sucesso)throw new Error(dados.mensagem||'Não foi possível excluir.');await carregarPowerMeters(true);alert(dados.mensagem||'Registro excluído.');}catch(e){alert('Erro ao excluir: '+e.message);}
+ try{
+  const dados=await apiPost({acao:'excluirPowerMeter',id:id});
+  if(!dados || !dados.sucesso){
+    if(dados && /Sessão administrativa/i.test(dados.mensagem||'')){ adminAutenticado=false; atualizarInterfaceLogin(); }
+    throw new Error((dados && (dados.mensagem||dados.erro)) || 'Não foi possível excluir.');
+  }
+  await carregarPowerMeters(true);
+  alert(dados.mensagem||'Registro excluído da planilha.');
+}catch(e){alert('Erro ao excluir: '+e.message);}
 }
 function escAttr(v){return String(v??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -2449,6 +2468,7 @@ async function login() {
         token =
             dados.token;
 
+        adminAutenticado = true;
 
         usuario =
             dados.usuario ||
@@ -2507,6 +2527,7 @@ async function login() {
 function sair() {
 
     token = "";
+    adminAutenticado = false;
 
     usuario = "";
 
@@ -2534,11 +2555,32 @@ function sair() {
 
 
 function estaLogado() {
-
-    return !!token;
-
+    return !!token && adminAutenticado === true;
 }
 
+
+async function validarSessaoAdmin() {
+    if (!token) {
+        adminAutenticado = false;
+        atualizarInterfaceLogin();
+        return false;
+    }
+    try {
+        const resposta = await apiPost({acao: "validarSessao"});
+        adminAutenticado = !!(resposta && resposta.sucesso);
+        if (!adminAutenticado) {
+            token = "";
+            usuario = "";
+            sessionStorage.removeItem("agendaToken");
+            sessionStorage.removeItem("agendaUsuario");
+        }
+    } catch (e) {
+        // Em caso de falha de rede, não conceder permissões de edição.
+        adminAutenticado = false;
+    }
+    atualizarInterfaceLogin();
+    return adminAutenticado;
+}
 
 function atualizarInterfaceLogin() {
 
@@ -2837,6 +2879,7 @@ carregarCacheLocal();
 atualizarFiltroTecnicos();
 
 atualizarInterfaceLogin();
+validarSessaoAdmin();
 
 renderizar();
 
