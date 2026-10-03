@@ -1630,7 +1630,7 @@ button:disabled {
 ========================================================= */
 
 const API_URL =
-    "https://script.google.com/macros/s/AKfycbzgfpdjMAJyzJKFEONWPqADysOjWc0alfgzb5j_JmiNv33_Uhnr4EyDVq07lX2bBdkX/exec";
+    "https://script.google.com/macros/s/AKfycbwc4E-evaEp8_0jhN3SpHA7mNaooojiNO7sth--e7rKJpBdm2f1MH-4KaOZ2vPW0kfx/exec";
 
 
 let atividades = [];
@@ -2224,7 +2224,8 @@ async function carregarPowerMeters(forcar=false){
     atualizarPermissoesPowerMeter();
     filtrarPowerMeters();
     status.textContent=`${powerMeters.length} registro(s) carregado(s) — planilha: Santa Luzia.`;
-  }catch(e){status.textContent='⚠ '+e.message; document.getElementById('listaPowerMeters').innerHTML=`<tr><td colspan="13" class="tecnico-vazio">${esc(e.message)}</td></tr>`;}
+    return {sucesso:true};
+  }catch(e){status.textContent='⚠ '+e.message; document.getElementById('listaPowerMeters').innerHTML=`<tr><td colspan="13" class="tecnico-vazio">${esc(e.message)}</td></tr>`; return {sucesso:false,mensagem:e.message};}
 }
 
 function preencherFiltroResponsavel(){
@@ -2287,7 +2288,19 @@ async function salvarPowerMeter(){
  if(!estaLogado()){ alert('Apenas o usuário administrador logado pode salvar alterações.'); return; }
  const item={id:document.getElementById('pmId').value,numero:document.getElementById('pmNumero').value,modelo:document.getElementById('pmModelo').value.trim(),colaborador:document.getElementById('pmColaborador').value.trim(),patrimonio:document.getElementById('pmPatrimonio').value,sinalPadrao:document.getElementById('pmPadrao').value,sinalEncontrado:document.getElementById('pmEncontrado').value,dataAfericao:document.getElementById('pmData').value,responsavel:document.getElementById('pmResponsavel').value.trim()};
  if(!item.modelo||!item.colaborador||!item.dataAfericao){alert('Preencha Marca/Modelo, Nome Colaborador e Data da aferição.');return;}
- try{const dados=await apiPost({acao:item.id?'editarPowerMeter':'adicionarPowerMeter',id:item.id || '',powerMeter:item}); if(!dados.sucesso)throw new Error(dados.mensagem||'Não foi possível salvar.'); fecharModalPowerMeter(); await carregarPowerMeters(true); alert(dados.mensagem||'Power Meter salvo.');}catch(e){alert('Erro ao salvar: '+e.message);}
+ try{
+  const dados=await apiPost({acao:item.id?'editarPowerMeter':'adicionarPowerMeter',id:item.id || '',powerMeter:item});
+  if(!dados || !dados.sucesso) throw new Error((dados && dados.mensagem)||'Não foi possível salvar.');
+  const recarga=await carregarPowerMeters(true);
+  if(!recarga || !recarga.sucesso) throw new Error('A gravação foi enviada, mas não consegui confirmar a leitura da aba Santa Luzia. '+(recarga?.mensagem||''));
+  if(item.id){
+   const salvo=powerMeters.find(x=>String(x.id)===String(item.id));
+   const igual=(a,b)=>{const na=Number(String(a??'').replace(',','.')),nb=Number(String(b??'').replace(',','.'));return String(a??'').trim()!==''&&String(b??'').trim()!==''&&Number.isFinite(na)&&Number.isFinite(nb)?na===nb:String(a??'').trim()===String(b??'').trim();};
+   if(!salvo || ![['numero',item.numero],['modelo',item.modelo],['colaborador',item.colaborador],['patrimonio',item.patrimonio],['sinalPadrao',item.sinalPadrao],['sinalEncontrado',item.sinalEncontrado],['dataAfericaoISO',item.dataAfericao],['responsavel',item.responsavel]].every(([k,v])=>igual(salvo[k],v))) throw new Error('A planilha não confirmou os valores editados na aba Santa Luzia.');
+  }
+  fecharModalPowerMeter();
+  alert('Power Meter salvo e confirmado na aba Santa Luzia.');
+ }catch(e){alert('Erro ao salvar: '+e.message);}
 }
 async function excluirPowerMeter(id){
  if(!estaLogado()){ alert('Apenas o usuário administrador logado pode excluir registros.'); return; }
@@ -2490,7 +2503,16 @@ async function apiGet() {
 
 async function apiPost(payload) {
     const payloadSeguro = { ...(payload || {}), token: token || "" };
-    return await apiJsonp(payloadSeguro);
+    try {
+        return await apiJsonp(payloadSeguro);
+    } catch (erroJsonp) {
+        // Edição de linha é idempotente: o POST oculto funciona como fallback
+        // se o navegador bloquear a resposta JSONP do GET.
+        if (String(payloadSeguro.acao || "") === "editarPowerMeter") {
+            return await apiPostFormulario(payloadSeguro);
+        }
+        throw erroJsonp;
+    }
 }
 
 function apiPostFormulario(payload) {
@@ -4446,4 +4468,3 @@ document.addEventListener(
 </body>
 
 </html>
- 
