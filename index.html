@@ -1630,7 +1630,7 @@ button:disabled {
 ========================================================= */
 
 const API_URL =
-    "https://script.google.com/macros/s/AKfycbwc4E-evaEp8_0jhN3SpHA7mNaooojiNO7sth--e7rKJpBdm2f1MH-4KaOZ2vPW0kfx/exec";
+    "https://script.google.com/macros/s/AKfycbzgfpdjMAJyzJKFEONWPqADysOjWc0alfgzb5j_JmiNv33_Uhnr4EyDVq07lX2bBdkX/exec";
 
 
 let atividades = [];
@@ -1645,9 +1645,8 @@ let sincronizando = false;
 
 let token =
     sessionStorage.getItem("agendaToken") || "";
-
-// Só libera edição depois que o servidor confirmar a sessão administrativa.
 let adminAutenticado = false;
+
 
 let usuario =
     sessionStorage.getItem("agendaUsuario") || "";
@@ -2203,16 +2202,6 @@ function escJS(v) {
         .replace(/'/g, "\\'");
 }
 
-// Escapa texto antes de inserir conteúdo vindo das planilhas no HTML.
-function esc(v) {
-    return String(v ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-}
-
 
 
 /* =========================================================
@@ -2298,355 +2287,14 @@ async function salvarPowerMeter(){
  if(!estaLogado()){ alert('Apenas o usuário administrador logado pode salvar alterações.'); return; }
  const item={id:document.getElementById('pmId').value,numero:document.getElementById('pmNumero').value,modelo:document.getElementById('pmModelo').value.trim(),colaborador:document.getElementById('pmColaborador').value.trim(),patrimonio:document.getElementById('pmPatrimonio').value,sinalPadrao:document.getElementById('pmPadrao').value,sinalEncontrado:document.getElementById('pmEncontrado').value,dataAfericao:document.getElementById('pmData').value,responsavel:document.getElementById('pmResponsavel').value.trim()};
  if(!item.modelo||!item.colaborador||!item.dataAfericao){alert('Preencha Marca/Modelo, Nome Colaborador e Data da aferição.');return;}
- try{
-  const dados=await apiPost({acao:item.id?'editarPowerMeter':'adicionarPowerMeter',id:item.id || '',powerMeter:item});
-  if(!dados || !dados.sucesso){
-    if(dados && /Sessão administrativa/i.test(dados.mensagem||'')){ adminAutenticado=false; atualizarInterfaceLogin(); }
-    throw new Error((dados && (dados.mensagem||dados.erro)) || 'Não foi possível salvar.');
-  }
-  fecharModalPowerMeter();
-  await carregarPowerMeters(true);
-  alert(dados.mensagem||'Power Meter salvo na planilha.');
-}catch(e){alert('Erro ao salvar: '+e.message);}
+ try{const dados=await apiPost({acao:item.id?'editarPowerMeter':'adicionarPowerMeter',id:item.id || '',powerMeter:item}); if(!dados.sucesso)throw new Error(dados.mensagem||'Não foi possível salvar.'); fecharModalPowerMeter(); await carregarPowerMeters(true); alert(dados.mensagem||'Power Meter salvo.');}catch(e){alert('Erro ao salvar: '+e.message);}
 }
 async function excluirPowerMeter(id){
  if(!estaLogado()){ alert('Apenas o usuário administrador logado pode excluir registros.'); return; }
  const item=powerMeters.find(x=>String(x.id)===String(id)); if(!item)return; if(!confirm(`Excluir o Power Meter nº ${item.numero} da aba Santa Luzia?`))return;
- try{
-  const dados=await apiPost({acao:'excluirPowerMeter',id:id});
-  if(!dados || !dados.sucesso){
-    if(dados && /Sessão administrativa/i.test(dados.mensagem||'')){ adminAutenticado=false; atualizarInterfaceLogin(); }
-    throw new Error((dados && (dados.mensagem||dados.erro)) || 'Não foi possível excluir.');
-  }
-  await carregarPowerMeters(true);
-  alert(dados.mensagem||'Registro excluído da planilha.');
-}catch(e){alert('Erro ao excluir: '+e.message);}
+ try{const dados=await apiPost({acao:'excluirPowerMeter',id:id});if(!dados.sucesso)throw new Error(dados.mensagem||'Não foi possível excluir.');await carregarPowerMeters(true);alert(dados.mensagem||'Registro excluído.');}catch(e){alert('Erro ao excluir: '+e.message);}
 }
 function escAttr(v){return String(v??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-function abrirLogin() {
-
-    document
-        .getElementById(
-            "modalLogin"
-        )
-        .classList.remove(
-            "oculto"
-        );
-
-
-    document
-        .getElementById(
-            "erroLogin"
-        )
-        .textContent = "";
-
-
-    document
-        .getElementById(
-            "loginUsuario"
-        )
-        .focus();
-
-}
-
-
-function fecharLogin() {
-
-    document
-        .getElementById(
-            "modalLogin"
-        )
-        .classList.add(
-            "oculto"
-        );
-
-}
-
-
-async function login() {
-
-    const usuarioInput =
-        document
-            .getElementById(
-                "loginUsuario"
-            )
-            .value
-            .trim();
-
-
-    const senha =
-        document
-            .getElementById(
-                "loginSenha"
-            )
-            .value;
-
-
-    const erro =
-        document
-            .getElementById(
-                "erroLogin"
-            );
-
-
-    const botao =
-        document
-            .getElementById(
-                "btnEntrar"
-            );
-
-
-    erro.textContent = "";
-
-
-    if (
-        !usuarioInput ||
-        !senha
-    ) {
-
-        erro.textContent =
-            "Informe usuário e senha.";
-
-        return;
-
-    }
-
-
-    botao.disabled =
-        true;
-
-    botao.textContent =
-        "Entrando...";
-
-
-    try {
-
-        const dados =
-            await apiPost({
-
-                acao: "login",
-
-                usuario:
-                    usuarioInput,
-
-                senha:
-                    senha
-
-            });
-
-
-        console.log(
-            "Resposta do Google Apps Script:",
-            dados
-        );
-
-
-        if (!dados.sucesso) {
-
-            erro.textContent =
-                dados.erro ||
-                dados.message ||
-                dados.mensagem ||
-                "O servidor recusou o login.";
-
-            return;
-
-        }
-
-
-        if (!dados.token) {
-
-            erro.textContent =
-                "Login aceito, mas o servidor não retornou o token.";
-
-            return;
-
-        }
-
-
-        token =
-            dados.token;
-
-        adminAutenticado = true;
-
-        usuario =
-            dados.usuario ||
-            usuarioInput;
-
-
-        sessionStorage.setItem(
-            "agendaToken",
-            token
-        );
-
-
-        sessionStorage.setItem(
-            "agendaUsuario",
-            usuario
-        );
-
-
-        fecharLogin();
-
-        atualizarInterfaceLogin();
-
-
-        setStatusConexao(
-            "✓ Administrador conectado.",
-            "sucesso"
-        );
-
-
-    } catch (erroCatch) {
-
-        console.error(
-            "Erro no login:",
-            erroCatch
-        );
-
-
-        erro.textContent =
-            "Não foi possível comunicar com o servidor: " +
-            erroCatch.message;
-
-
-    } finally {
-
-        botao.disabled =
-            false;
-
-        botao.textContent =
-            "Entrar";
-
-    }
-
-}
-
-
-function sair() {
-
-    token = "";
-    adminAutenticado = false;
-
-    usuario = "";
-
-    sessionStorage.removeItem(
-        "agendaToken"
-    );
-
-    sessionStorage.removeItem(
-        "agendaUsuario"
-    );
-
-    idEditando = null;
-
-    cancelarEdicao();
-
-    atualizarInterfaceLogin();
-
-
-    setStatusConexao(
-        "✓ Visualização pública. Login administrativo encerrado.",
-        "sucesso"
-    );
-
-}
-
-
-function estaLogado() {
-    return !!token && adminAutenticado === true;
-}
-
-
-async function validarSessaoAdmin() {
-    if (!token) {
-        adminAutenticado = false;
-        atualizarInterfaceLogin();
-        return false;
-    }
-    try {
-        const resposta = await apiPost({acao: "validarSessao"});
-        adminAutenticado = !!(resposta && resposta.sucesso);
-        if (!adminAutenticado) {
-            token = "";
-            usuario = "";
-            sessionStorage.removeItem("agendaToken");
-            sessionStorage.removeItem("agendaUsuario");
-        }
-    } catch (e) {
-        // Em caso de falha de rede, não conceder permissões de edição.
-        adminAutenticado = false;
-    }
-    atualizarInterfaceLogin();
-    return adminAutenticado;
-}
-
-function atualizarInterfaceLogin() {
-
-    const admin =
-        estaLogado();
-
-
-    document
-        .getElementById(
-            "painelCadastro"
-        )
-        .classList.toggle(
-            "oculto",
-            !admin
-        );
-
-
-    document
-        .getElementById(
-            "btnLimpar"
-        )
-        .classList.toggle(
-            "oculto",
-            !admin
-        );
-
-
-    document
-        .getElementById(
-            "btnLogin"
-        )
-        .classList.toggle(
-            "oculto",
-            admin
-        );
-
-
-    document
-        .getElementById(
-            "btnSair"
-        )
-        .classList.toggle(
-            "oculto",
-            !admin
-        );
-
-
-    document
-        .getElementById(
-            "statusLogin"
-        )
-        .textContent =
-        admin
-            ? "👤 Administrador: " +
-              usuario
-            : "👤 Visualização pública";
-
-
-    renderizar();
-    atualizarPermissoesPowerMeter();
-    if (!admin) fecharModalPowerMeter();
-    if (powerMetersCarregados) filtrarPowerMeters();
-
-}
-
-
 
 /* =========================================================
    DATAS
@@ -2841,23 +2489,1902 @@ async function apiGet() {
 }
 
 async function apiPost(payload) {
-    const payloadSeguro = {
-        ...(payload || {}),
-        token: token || ""
-    };
-
-    /*
-     * GitHub Pages e Google Apps Script estão em domínios diferentes.
-     * Para evitar CORS/Failed to fetch, TODAS as operações passam pelo
-     * mesmo canal JSONP. O doGet() do Apps Script encaminha o payload
-     * para o doPost(), inclusive nas operações que alteram a planilha.
-     *
-     * Isso é importante para o Power Meter: agora o HTML recebe a resposta
-     * REAL do Apps Script. Se a gravação falhar, o usuário verá o erro do
-     * servidor em vez de uma falsa confirmação de envio.
-     */
+    const payloadSeguro = { ...(payload || {}), token: token || "" };
     return await apiJsonp(payloadSeguro);
 }
+
+function apiPostFormulario(payload) {
+    return new Promise(function(resolve, reject) {
+        const frameName = "__agendaPostFrame_" + Date.now() + "_" +
+            Math.floor(Math.random() * 1000000);
+
+        const iframe = document.createElement("iframe");
+        iframe.name = frameName;
+        iframe.style.display = "none";
+        iframe.setAttribute("aria-hidden", "true");
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = API_URL;
+        form.target = frameName;
+        form.style.display = "none";
+
+        const campo = document.createElement("input");
+        campo.type = "hidden";
+        campo.name = "payload";
+        campo.value = JSON.stringify(payload || {});
+        form.appendChild(campo);
+
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+
+        let finalizado = false;
+        const timeout = setTimeout(function() {
+            if (finalizado) return;
+            finalizado = true;
+            limpar();
+            reject(new Error(
+                "Tempo esgotado ao enviar os dados ao Google Apps Script."
+            ));
+        }, 30000);
+
+        function limpar() {
+            clearTimeout(timeout);
+            try { form.remove(); } catch(e) {}
+            try { iframe.remove(); } catch(e) {}
+        }
+
+        // Formulários HTML podem ser enviados para outro domínio sem CORS.
+        // O iframe pode disparar um onload apenas para a resposta do POST;
+        // não devemos esperar um "segundo load", pois isso fazia a tela
+        // ficar aguardando até o timeout mesmo quando o Apps Script recebia
+        // a gravação.
+        let enviado = false;
+        iframe.onload = function() {
+            if (!enviado || finalizado) return;
+
+            finalizado = true;
+            limpar();
+
+            resolve({
+                sucesso: true,
+                mensagem: "Dados enviados ao Google Apps Script."
+            });
+        };
+
+        iframe.onerror = function() {
+            if (finalizado) return;
+            finalizado = true;
+            limpar();
+            reject(new Error(
+                "Não foi possível enviar os dados ao Google Apps Script."
+            ));
+        };
+
+        try {
+            enviado = true;
+            form.submit();
+        } catch (e) {
+            if (finalizado) return;
+            finalizado = true;
+            limpar();
+            reject(e);
+        }
+    });
+}
+
+
+/* =========================================================
+   SINCRONIZAÇÃO
+========================================================= */
+
+async function sincronizar() {
+
+    if (sincronizando)
+        return;
+
+
+    sincronizando = true;
+
+
+    setStatusConexao(
+        "Sincronizando com a Google Planilha...",
+        "aviso"
+    );
+
+
+    try {
+
+        const dados =
+            await apiGet();
+
+
+        if (!dados.sucesso) {
+
+            throw new Error(
+                dados.erro ||
+                dados.message ||
+                dados.mensagem ||
+                "Falha ao buscar os dados."
+            );
+
+        }
+
+
+        atividades =
+            Array.isArray(
+                dados.atividades
+            )
+                ? dados.atividades
+                : [];
+
+
+        bancoLocal();
+
+        atualizarFiltroTecnicos();
+
+        renderizar();
+
+
+        setStatusConexao(
+            "✓ Dados sincronizados com a Google Planilha.",
+            "sucesso"
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            "Erro na sincronização:",
+            erro
+        );
+
+
+        carregarCacheLocal();
+
+        atualizarFiltroTecnicos();
+
+        renderizar();
+
+
+        setStatusConexao(
+            "⚠ Sem conexão. Exibindo o último cache local.",
+            "erro"
+        );
+
+
+    } finally {
+
+        sincronizando =
+            false;
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+function abrirLogin() {
+
+    document
+        .getElementById(
+            "modalLogin"
+        )
+        .classList.remove(
+            "oculto"
+        );
+
+
+    document
+        .getElementById(
+            "erroLogin"
+        )
+        .textContent = "";
+
+
+    document
+        .getElementById(
+            "loginUsuario"
+        )
+        .focus();
+
+}
+
+
+function fecharLogin() {
+
+    document
+        .getElementById(
+            "modalLogin"
+        )
+        .classList.add(
+            "oculto"
+        );
+
+}
+
+
+async function login() {
+
+    const usuarioInput =
+        document
+            .getElementById(
+                "loginUsuario"
+            )
+            .value
+            .trim();
+
+
+    const senha =
+        document
+            .getElementById(
+                "loginSenha"
+            )
+            .value;
+
+
+    const erro =
+        document
+            .getElementById(
+                "erroLogin"
+            );
+
+
+    const botao =
+        document
+            .getElementById(
+                "btnEntrar"
+            );
+
+
+    erro.textContent = "";
+
+
+    if (
+        !usuarioInput ||
+        !senha
+    ) {
+
+        erro.textContent =
+            "Informe usuário e senha.";
+
+        return;
+
+    }
+
+
+    botao.disabled =
+        true;
+
+    botao.textContent =
+        "Entrando...";
+
+
+    try {
+
+        const dados =
+            await apiPost({
+
+                acao: "login",
+
+                usuario:
+                    usuarioInput,
+
+                senha:
+                    senha
+
+            });
+
+
+        console.log(
+            "Resposta do Google Apps Script:",
+            dados
+        );
+
+
+        if (!dados.sucesso) {
+
+            erro.textContent =
+                dados.erro ||
+                dados.message ||
+                dados.mensagem ||
+                "O servidor recusou o login.";
+
+            return;
+
+        }
+
+
+        if (!dados.token) {
+
+            erro.textContent =
+                "Login aceito, mas o servidor não retornou o token.";
+
+            return;
+
+        }
+
+
+        token = dados.token;
+        adminAutenticado = true;
+
+
+        usuario =
+            dados.usuario ||
+            usuarioInput;
+
+
+        sessionStorage.setItem(
+            "agendaToken",
+            token
+        );
+
+
+        sessionStorage.setItem(
+            "agendaUsuario",
+            usuario
+        );
+
+
+        fecharLogin();
+
+        atualizarInterfaceLogin();
+
+
+        setStatusConexao(
+            "✓ Administrador conectado.",
+            "sucesso"
+        );
+
+
+    } catch (erroCatch) {
+
+        console.error(
+            "Erro no login:",
+            erroCatch
+        );
+
+
+        erro.textContent =
+            "Não foi possível comunicar com o servidor: " +
+            erroCatch.message;
+
+
+    } finally {
+
+        botao.disabled =
+            false;
+
+        botao.textContent =
+            "Entrar";
+
+    }
+
+}
+
+
+function sair() {
+    adminAutenticado = false;
+
+    token = "";
+
+    usuario = "";
+
+    sessionStorage.removeItem(
+        "agendaToken"
+    );
+
+    sessionStorage.removeItem(
+        "agendaUsuario"
+    );
+
+    idEditando = null;
+
+    cancelarEdicao();
+
+    atualizarInterfaceLogin();
+
+
+    setStatusConexao(
+        "✓ Visualização pública. Login administrativo encerrado.",
+        "sucesso"
+    );
+
+}
+
+
+function estaLogado() {
+    return !!token && adminAutenticado === true;
+}
+
+async function validarSessaoAdmin() {
+    if (!token) { adminAutenticado = false; atualizarInterfaceLogin(); return false; }
+    try {
+        const resposta = await apiPost({ acao: "validarSessao" });
+        adminAutenticado = !!(resposta && resposta.sucesso);
+        if (!adminAutenticado) {
+            token = ""; usuario = "";
+            sessionStorage.removeItem("agendaToken");
+            sessionStorage.removeItem("agendaUsuario");
+        }
+    } catch (e) { adminAutenticado = false; }
+    atualizarInterfaceLogin();
+    return adminAutenticado;
+}
+
+function atualizarInterfaceLogin() {
+
+    const admin =
+        estaLogado();
+
+
+    document
+        .getElementById(
+            "painelCadastro"
+        )
+        .classList.toggle(
+            "oculto",
+            !admin
+        );
+
+
+    document
+        .getElementById(
+            "btnLimpar"
+        )
+        .classList.toggle(
+            "oculto",
+            !admin
+        );
+
+
+    document
+        .getElementById(
+            "btnLogin"
+        )
+        .classList.toggle(
+            "oculto",
+            admin
+        );
+
+
+    document
+        .getElementById(
+            "btnSair"
+        )
+        .classList.toggle(
+            "oculto",
+            !admin
+        );
+
+
+    document
+        .getElementById(
+            "statusLogin"
+        )
+        .textContent =
+        admin
+            ? "👤 Administrador: " +
+              usuario
+            : "👤 Visualização pública";
+
+
+    renderizar();
+    atualizarPermissoesPowerMeter();
+    if (!admin) fecharModalPowerMeter();
+    if (powerMetersCarregados) filtrarPowerMeters();
+
+}
+
+
+/* =========================================================
+   FORMULÁRIO
+========================================================= */
+
+function limparFormulario() {
+
+    document
+        .getElementById(
+            "data"
+        )
+        .value =
+        dataISO(
+            new Date()
+        );
+
+
+    document
+        .getElementById(
+            "atividade"
+        )
+        .value = "";
+
+
+    document
+        .getElementById(
+            "tecnico"
+        )
+        .value = "";
+
+
+    document
+        .getElementById(
+            "local"
+        )
+        .value = "";
+
+
+    document
+        .getElementById(
+            "prioridade"
+        )
+        .value =
+        "Média";
+
+
+    document
+        .getElementById(
+            "status"
+        )
+        .value =
+        "Planejado";
+
+}
+
+
+function cancelarEdicao() {
+
+    idEditando =
+        null;
+
+    limparFormulario();
+
+
+    document
+        .getElementById(
+            "btnSalvar"
+        )
+        .innerText =
+        "Adicionar atividade";
+
+
+    document
+        .getElementById(
+            "btnCancelar"
+        )
+        .style.display =
+        "none";
+
+
+    renderizar();
+
+}
+
+
+/* =========================================================
+   ADICIONAR / EDITAR
+========================================================= */
+
+async function salvarAtividade() {
+
+    if (!estaLogado()) {
+
+        abrirLogin();
+
+        return;
+
+    }
+
+
+    const data =
+        document
+            .getElementById(
+                "data"
+            )
+            .value;
+
+
+    const atividade =
+        document
+            .getElementById(
+                "atividade"
+            )
+            .value
+            .trim();
+
+
+    const tecnico =
+        document
+            .getElementById(
+                "tecnico"
+            )
+            .value
+            .trim();
+
+
+    const local =
+        document
+            .getElementById(
+                "local"
+            )
+            .value
+            .trim();
+
+
+    const prioridade =
+        document
+            .getElementById(
+                "prioridade"
+            )
+            .value;
+
+
+    const status =
+        document
+            .getElementById(
+                "status"
+            )
+            .value;
+
+
+    if (!data) {
+
+        alert(
+            "Escolha a data da atividade."
+        );
+
+        return;
+
+    }
+
+
+   if (
+    !data ||
+    !atividade ||
+    !tecnico ||
+    !local ||
+    !prioridade ||
+    !status
+) {
+
+    alert(
+        "Preencha todos os campos da atividade."
+    );
+
+    return;
+
+}
+
+
+    const botao =
+        document.getElementById(
+            "btnSalvar"
+        );
+
+
+    botao.disabled =
+        true;
+
+
+    try {
+
+        setStatusConexao(
+            idEditando !== null
+                ? "Salvando alteração..."
+                : "Salvando atividade...",
+            "aviso"
+        );
+
+
+        const payload = {
+
+            acao:
+                idEditando !== null
+                    ? "editar"
+                    : "adicionar",
+
+            token:
+                token,
+
+            id:
+                idEditando !== null
+                    ? idEditando
+                    : "",
+
+            data:
+                data,
+
+            atividade:
+                atividade,
+
+            tecnico:
+                tecnico,
+
+            local:
+                local,
+
+            prioridade:
+                prioridade,
+
+            status:
+                status
+
+        };
+
+
+        const retorno =
+            await apiPost(
+                payload
+            );
+
+
+        if (!retorno.sucesso) {
+
+            throw new Error(
+                retorno.erro ||
+                retorno.message ||
+                retorno.mensagem ||
+                "Não foi possível salvar."
+            );
+
+        }
+
+
+        cancelarEdicao();
+
+
+        await sincronizar();
+
+
+        setStatusConexao(
+            "✓ Atividade salva na Google Planilha.",
+            "sucesso"
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            erro
+        );
+
+
+        if (
+            String(
+                erro.message
+            )
+            .toLowerCase()
+            .includes("sessão")
+        ) {
+
+            sair();
+
+        }
+
+
+        alert(
+            "Não foi possível salvar na planilha.\n\n" +
+            erro.message
+        );
+
+
+        setStatusConexao(
+            "⚠ Erro ao salvar na planilha.",
+            "erro"
+        );
+
+
+    } finally {
+
+        botao.disabled =
+            false;
+
+    }
+
+}
+
+
+/* =========================================================
+   EDITAR ATIVIDADE
+========================================================= */
+
+function editarAtividade(id) {
+
+    if (!estaLogado()) {
+
+        abrirLogin();
+
+        return;
+
+    }
+
+
+    const x =
+        atividades.find(
+            function(a) {
+
+                return String(a.id) ===
+                    String(id);
+
+            }
+        );
+
+
+    if (!x)
+        return;
+
+
+    idEditando =
+        x.id;
+
+
+    document
+        .getElementById(
+            "data"
+        )
+        .value =
+        x.data;
+
+
+    document
+        .getElementById(
+            "atividade"
+        )
+        .value =
+        x.atividade;
+
+
+    document
+        .getElementById(
+            "tecnico"
+        )
+        .value =
+        x.tecnico;
+
+
+    document
+        .getElementById(
+            "local"
+        )
+        .value =
+        x.local || "";
+
+
+    document
+        .getElementById(
+            "prioridade"
+        )
+        .value =
+        x.prioridade ||
+        "Média";
+
+
+    document
+        .getElementById(
+            "status"
+        )
+        .value =
+        x.status ||
+        "Planejado";
+
+
+    document
+        .getElementById(
+            "btnSalvar"
+        )
+        .innerText =
+        "Salvar alterações";
+
+
+    document
+        .getElementById(
+            "btnCancelar"
+        )
+        .style.display =
+        "inline-block";
+
+
+    document
+        .getElementById(
+            "atividade"
+        )
+        .focus();
+
+
+    renderizar();
+
+}
+
+
+/* =========================================================
+   EXCLUIR
+========================================================= */
+
+async function excluirAtividade(id) {
+
+    if (!estaLogado()) {
+
+        abrirLogin();
+
+        return;
+
+    }
+
+
+    if (
+        !confirm(
+            "Deseja excluir esta atividade?"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        setStatusConexao(
+            "Excluindo atividade...",
+            "aviso"
+        );
+
+
+        const retorno =
+            await apiPost({
+
+                acao:
+                    "excluir",
+
+                token:
+                    token,
+
+                id:
+                    id
+
+            });
+
+
+        if (!retorno.sucesso) {
+
+            throw new Error(
+                retorno.erro ||
+                retorno.message ||
+                retorno.mensagem ||
+                "Não foi possível excluir."
+            );
+
+        }
+
+
+        await sincronizar();
+
+
+        setStatusConexao(
+            "✓ Atividade excluída da planilha.",
+            "sucesso"
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            erro
+        );
+
+
+        if (
+            String(
+                erro.message
+            )
+            .toLowerCase()
+            .includes("sessão")
+        ) {
+
+            sair();
+
+        }
+
+
+        alert(
+            "Não foi possível excluir na planilha.\n\n" +
+            erro.message
+        );
+
+
+        setStatusConexao(
+            "⚠ Erro ao excluir na planilha.",
+            "erro"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RENDERIZAÇÃO DA SEMANA
+========================================================= */
+
+function renderizar() {
+
+    const inicio =
+        inicioSemana(
+            dataReferencia
+        );
+
+
+    const dias = [
+
+        [
+            "Segunda",
+            "dataSegunda"
+        ],
+
+        [
+            "Terça",
+            "dataTerca"
+        ],
+
+        [
+            "Quarta",
+            "dataQuarta"
+        ],
+
+        [
+            "Quinta",
+            "dataQuinta"
+        ],
+
+        [
+            "Sexta",
+            "dataSexta"
+        ],
+
+        [
+            "Sábado",
+            "dataSabado"
+        ],
+
+        [
+            "Domingo",
+            "dataDomingo"
+        ]
+
+    ];
+
+
+    const ft =
+        document
+            .getElementById(
+                "filtroTecnico"
+            )
+            .value;
+
+
+    const fs =
+        document
+            .getElementById(
+                "filtroStatus"
+            )
+            .value;
+
+
+    const pesquisa =
+        document
+            .getElementById(
+                "pesquisa"
+            )
+            .value
+            .toLowerCase()
+            .trim();
+
+
+    dias.forEach(
+        function(d, i) {
+
+            let data =
+                new Date(
+                    inicio
+                );
+
+
+            data.setDate(
+                inicio.getDate() +
+                i
+            );
+
+
+            document
+                .getElementById(
+                    d[0]
+                )
+                .innerHTML =
+                "";
+
+
+            document
+                .getElementById(
+                    d[1]
+                )
+                .innerText =
+                formatarData(
+                    data
+                );
+
+
+            let lista =
+                atividades.filter(
+                    function(x) {
+
+                        return (
+
+                            x.data ===
+                            dataISO(data)
+
+                            &&
+
+                            (
+                                !ft ||
+                                x.tecnico === ft
+                            )
+
+                            &&
+
+                            (
+                                !fs ||
+                                x.status === fs
+                            )
+
+                            &&
+
+                            (
+                                !pesquisa ||
+
+                                (
+                                    x.atividade +
+                                    " " +
+                                    x.tecnico +
+                                    " " +
+                                    (x.local || "")
+                                )
+                                .toLowerCase()
+                                .includes(
+                                    pesquisa
+                                )
+                            )
+
+                        );
+
+                    }
+                );
+
+
+            const area =
+                document.getElementById(
+                    d[0]
+                );
+
+
+            if (!lista.length) {
+
+                area.innerHTML =
+                    '<div class="vazio">' +
+                    'Nenhuma atividade' +
+                    '</div>';
+
+                return;
+
+            }
+
+
+            lista.forEach(
+                function(x) {
+
+                    let div =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    div.className =
+                        "atividade";
+
+
+                    if (
+                        String(x.id) ===
+                        String(idEditando)
+                    ) {
+
+                        div.classList.add(
+                            "editando"
+                        );
+
+                    }
+
+
+                    let st = {
+
+                        "Planejado":
+                            "planejado",
+
+                        "Em andamento":
+                            "andamento",
+
+                        "Concluído":
+                            "concluido",
+
+                        "Pendente":
+                            "pendente"
+
+                    }[
+                        x.status
+                    ] || "";
+
+
+                    let pc = {
+
+                        "Alta":
+                            "alta",
+
+                        "Média":
+                            "media",
+
+                        "Baixa":
+                            "baixa"
+
+                    }[
+                        x.prioridade ||
+                        "Média"
+                    ];
+
+
+                    let botoes =
+                        estaLogado()
+
+                            ? `
+
+                                <button
+                                    class="btn-editar"
+                                    onclick="editarAtividade('${String(x.id).replace(/'/g, "\\'")}')">
+
+                                    Editar
+
+                                </button>
+
+                                <button
+                                    class="btn-excluir"
+                                    onclick="excluirAtividade('${String(x.id).replace(/'/g, "\\'")}')">
+
+                                    Excluir
+
+                                </button>
+
+                            `
+
+                            : "";
+
+
+                    div.innerHTML =
+
+                        `<strong>
+                            ${esc(x.atividade)}
+                        </strong>
+
+                        <div class="tecnico">
+                            👷 Técnico:
+                            ${esc(x.tecnico)}
+                        </div>
+
+                        ${
+                            x.local
+                                ? `
+                                    <div class="local">
+                                        📍 ${esc(x.local)}
+                                    </div>
+                                  `
+                                : ""
+                        }
+
+                        <div class="prioridade ${pc}">
+                            ● Prioridade:
+                            ${esc(
+                                x.prioridade ||
+                                "Média"
+                            )}
+                        </div>
+
+                        <br>
+
+                        <span class="status ${st}">
+                            ${esc(
+                                x.status
+                            )}
+                        </span>
+
+                        <br>
+
+                        ${botoes}`;
+
+
+                    area.appendChild(
+                        div
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    /* MOSTRA QUAL SEMANA ESTÁ SENDO VISUALIZADA */
+
+    let fim =
+        new Date(
+            inicio
+        );
+
+
+    fim.setDate(
+        inicio.getDate() +
+        6
+    );
+
+
+    document
+        .getElementById(
+            "semanaInfo"
+        )
+        .innerText =
+
+        "Semana: " +
+        formatarData(inicio) +
+        " até " +
+        formatarData(fim);
+
+    
+    atualizarResumo();
+
+}
+
+
+/* =========================================================
+   RESUMO
+========================================================= */
+
+function atualizarResumo() {
+
+    document
+        .getElementById(
+            "total"
+        )
+        .innerText =
+        atividades.length;
+
+
+    document
+        .getElementById(
+            "planejados"
+        )
+        .innerText =
+
+        atividades.filter(
+            function(x) {
+
+                return x.status ===
+                    "Planejado";
+
+            }
+        ).length;
+
+
+    document
+        .getElementById(
+            "andamento"
+        )
+        .innerText =
+
+        atividades.filter(
+            function(x) {
+
+                return x.status ===
+                    "Em andamento";
+
+            }
+        ).length;
+
+
+    document
+        .getElementById(
+            "concluidos"
+        )
+        .innerText =
+
+        atividades.filter(
+            function(x) {
+
+                return x.status ===
+                    "Concluído";
+
+            }
+        ).length;
+
+
+    document
+        .getElementById(
+            "pendentes"
+        )
+        .innerText =
+
+        atividades.filter(
+            function(x) {
+
+                return x.status ===
+                    "Pendente";
+
+            }
+        ).length;
+
+}
+
+
+/* =========================================================
+   FILTRO DE TÉCNICOS
+========================================================= */
+
+function atualizarFiltroTecnicos() {
+
+    const select =
+        document.getElementById(
+            "filtroTecnico"
+        );
+
+
+    const atual =
+        select.value;
+
+
+    const tecnicos =
+
+        [
+            ...new Set(
+
+                atividades
+
+                    .map(
+                        function(x) {
+
+                            return x.tecnico;
+
+                        }
+                    )
+
+                    .filter(Boolean)
+
+            )
+        ]
+
+        .sort(
+            function(a, b) {
+
+                return a.localeCompare(
+                    b
+                );
+
+            }
+        );
+
+
+    select.innerHTML =
+        '<option value="">' +
+        'Todos os técnicos' +
+        '</option>';
+
+
+    tecnicos.forEach(
+        function(x) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                x;
+
+            option.textContent =
+                x;
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    select.value =
+        atual;
+
+}
+
+
+/* =========================================================
+   NAVEGAÇÃO ENTRE SEMANAS
+========================================================= */
+
+function semanaAnterior() {
+
+    dataReferencia.setDate(
+        dataReferencia.getDate() -
+        7
+    );
+
+
+    renderizar();
+
+}
+
+
+function proximaSemana() {
+
+    dataReferencia.setDate(
+        dataReferencia.getDate() +
+        7
+    );
+
+
+    renderizar();
+
+}
+
+
+function irParaHoje() {
+
+    dataReferencia =
+        new Date();
+
+
+    renderizar();
+
+}
+
+
+/* =========================================================
+   ESCAPE DE HTML
+========================================================= */
+
+function esc(v) {
+
+    return String(
+        v ?? ""
+    )
+    .replace(
+        /[&<>"']/g,
+        function(c) {
+
+            return {
+
+                "&":
+                    "&amp;",
+
+                "<":
+                    "&lt;",
+
+                ">":
+                    "&gt;",
+
+                '"':
+                    "&quot;",
+
+                "'":
+                    "&#039;"
+
+            }[c];
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   EXPORTAR CSV
+========================================================= */
+
+function exportarCSV() {
+
+    if (!atividades.length) {
+
+        alert(
+            "Não há atividades para exportar."
+        );
+
+        return;
+
+    }
+
+
+    let linhas = [
+
+        [
+            "ID",
+            "Data",
+            "Atividade",
+            "Técnico",
+            "Local",
+            "Prioridade",
+            "Status"
+        ],
+
+        ...atividades.map(
+            function(x) {
+
+                return [
+
+                    x.id,
+
+                    x.data,
+
+                    x.atividade,
+
+                    x.tecnico,
+
+                    x.local || "",
+
+                    x.prioridade ||
+                        "Média",
+
+                    x.status
+
+                ];
+
+            }
+        )
+
+    ];
+
+
+    let csv =
+
+        linhas
+
+            .map(
+                function(l) {
+
+                    return l
+
+                        .map(
+                            function(v) {
+
+                                return '"' +
+                                    String(v)
+                                    .replace(
+                                        /"/g,
+                                        '""'
+                                    ) +
+                                    '"';
+
+                            }
+                        )
+
+                        .join(";");
+
+                }
+            )
+
+            .join("\n");
+
+
+    let a =
+        document.createElement(
+            "a"
+        );
+
+
+    a.href =
+        URL.createObjectURL(
+
+            new Blob(
+                [
+                    "\ufeff" +
+                    csv
+                ],
+
+                {
+                    type:
+                        "text/csv;charset=utf-8"
+                }
+            )
+
+        );
+
+
+    a.download =
+        "agenda_inspetor.csv";
+
+
+    a.click();
+
+}
+
+
+/* =========================================================
+   LIMPAR AGENDA
+========================================================= */
+
+async function limparAgenda() {
+
+    if (!estaLogado()) {
+
+        abrirLogin();
+
+        return;
+
+    }
+
+
+    if (!atividades.length)
+        return;
+
+
+    if (
+        !confirm(
+            "Isso apagará TODAS as atividades da Google Planilha. Continuar?"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        setStatusConexao(
+            "Limpando agenda na planilha...",
+            "aviso"
+        );
+
+
+        const retorno =
+            await apiPost({
+
+                acao:
+                    "limpar",
+
+                token:
+                    token
+
+            });
+
+
+        if (!retorno.sucesso) {
+
+            throw new Error(
+                retorno.erro ||
+                retorno.message ||
+                retorno.mensagem ||
+                "Não foi possível limpar."
+            );
+
+        }
+
+
+        await sincronizar();
+
+        cancelarEdicao();
+
+
+        setStatusConexao(
+            "✓ Agenda limpa na Google Planilha.",
+            "sucesso"
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            erro
+        );
+
+
+        if (
+            String(
+                erro.message
+            )
+            .toLowerCase()
+            .includes("sessão")
+        ) {
+
+            sair();
+
+        }
+
+
+        alert(
+            "Não foi possível limpar a planilha.\n\n" +
+            erro.message
+        );
+
+
+        setStatusConexao(
+            "⚠ Erro ao limpar a planilha.",
+            "erro"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   ENTER NO LOGIN
+========================================================= */
+
+document
+    .getElementById(
+        "loginSenha"
+    )
+    .addEventListener(
+        "keydown",
+        function(e) {
+
+            if (
+                e.key ===
+                "Enter"
+            ) {
+
+                login();
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
+   FECHAR LOGIN CLICANDO FORA
+========================================================= */
+
+document
+    .getElementById(
+        "modalTecnico"
+    )
+    .addEventListener(
+        "click",
+        function(e) {
+            if (e.target === this) {
+                fecharDetalhesTecnico();
+            }
+        }
+    );
+
+
+document
+    .getElementById(
+        "modalLogin"
+    )
+    .addEventListener(
+        "click",
+        function(e) {
+
+            if (
+                e.target === this
+            ) {
+
+                fecharLogin();
+
+            }
+
+        }
+    );
 
 
 /* =========================================================
@@ -2879,6 +4406,7 @@ carregarCacheLocal();
 atualizarFiltroTecnicos();
 
 atualizarInterfaceLogin();
+
 validarSessaoAdmin();
 
 renderizar();
@@ -2918,4 +4446,4 @@ document.addEventListener(
 </body>
 
 </html>
-
+ 
