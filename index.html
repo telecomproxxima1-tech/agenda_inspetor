@@ -2305,6 +2305,307 @@ async function excluirPowerMeter(id){
 }
 function escAttr(v){return String(v??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+function abrirLogin() {
+
+    document
+        .getElementById(
+            "modalLogin"
+        )
+        .classList.remove(
+            "oculto"
+        );
+
+
+    document
+        .getElementById(
+            "erroLogin"
+        )
+        .textContent = "";
+
+
+    document
+        .getElementById(
+            "loginUsuario"
+        )
+        .focus();
+
+}
+
+
+function fecharLogin() {
+
+    document
+        .getElementById(
+            "modalLogin"
+        )
+        .classList.add(
+            "oculto"
+        );
+
+}
+
+
+async function login() {
+
+    const usuarioInput =
+        document
+            .getElementById(
+                "loginUsuario"
+            )
+            .value
+            .trim();
+
+
+    const senha =
+        document
+            .getElementById(
+                "loginSenha"
+            )
+            .value;
+
+
+    const erro =
+        document
+            .getElementById(
+                "erroLogin"
+            );
+
+
+    const botao =
+        document
+            .getElementById(
+                "btnEntrar"
+            );
+
+
+    erro.textContent = "";
+
+
+    if (
+        !usuarioInput ||
+        !senha
+    ) {
+
+        erro.textContent =
+            "Informe usuário e senha.";
+
+        return;
+
+    }
+
+
+    botao.disabled =
+        true;
+
+    botao.textContent =
+        "Entrando...";
+
+
+    try {
+
+        const dados =
+            await apiPost({
+
+                acao: "login",
+
+                usuario:
+                    usuarioInput,
+
+                senha:
+                    senha
+
+            });
+
+
+        console.log(
+            "Resposta do Google Apps Script:",
+            dados
+        );
+
+
+        if (!dados.sucesso) {
+
+            erro.textContent =
+                dados.erro ||
+                dados.message ||
+                dados.mensagem ||
+                "O servidor recusou o login.";
+
+            return;
+
+        }
+
+
+        if (!dados.token) {
+
+            erro.textContent =
+                "Login aceito, mas o servidor não retornou o token.";
+
+            return;
+
+        }
+
+
+        token =
+            dados.token;
+
+
+        usuario =
+            dados.usuario ||
+            usuarioInput;
+
+
+        sessionStorage.setItem(
+            "agendaToken",
+            token
+        );
+
+
+        sessionStorage.setItem(
+            "agendaUsuario",
+            usuario
+        );
+
+
+        fecharLogin();
+
+        atualizarInterfaceLogin();
+
+
+        setStatusConexao(
+            "✓ Administrador conectado.",
+            "sucesso"
+        );
+
+
+    } catch (erroCatch) {
+
+        console.error(
+            "Erro no login:",
+            erroCatch
+        );
+
+
+        erro.textContent =
+            "Não foi possível comunicar com o servidor: " +
+            erroCatch.message;
+
+
+    } finally {
+
+        botao.disabled =
+            false;
+
+        botao.textContent =
+            "Entrar";
+
+    }
+
+}
+
+
+function sair() {
+
+    token = "";
+
+    usuario = "";
+
+    sessionStorage.removeItem(
+        "agendaToken"
+    );
+
+    sessionStorage.removeItem(
+        "agendaUsuario"
+    );
+
+    idEditando = null;
+
+    cancelarEdicao();
+
+    atualizarInterfaceLogin();
+
+
+    setStatusConexao(
+        "✓ Visualização pública. Login administrativo encerrado.",
+        "sucesso"
+    );
+
+}
+
+
+function estaLogado() {
+
+    return !!token;
+
+}
+
+
+function atualizarInterfaceLogin() {
+
+    const admin =
+        estaLogado();
+
+
+    document
+        .getElementById(
+            "painelCadastro"
+        )
+        .classList.toggle(
+            "oculto",
+            !admin
+        );
+
+
+    document
+        .getElementById(
+            "btnLimpar"
+        )
+        .classList.toggle(
+            "oculto",
+            !admin
+        );
+
+
+    document
+        .getElementById(
+            "btnLogin"
+        )
+        .classList.toggle(
+            "oculto",
+            admin
+        );
+
+
+    document
+        .getElementById(
+            "btnSair"
+        )
+        .classList.toggle(
+            "oculto",
+            !admin
+        );
+
+
+    document
+        .getElementById(
+            "statusLogin"
+        )
+        .textContent =
+        admin
+            ? "👤 Administrador: " +
+              usuario
+            : "👤 Visualização pública";
+
+
+    renderizar();
+    atualizarPermissoesPowerMeter();
+    if (!admin) fecharModalPowerMeter();
+    if (powerMetersCarregados) filtrarPowerMeters();
+
+}
+
+
+
 /* =========================================================
    DATAS
 ========================================================= */
