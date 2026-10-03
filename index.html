@@ -1630,7 +1630,7 @@ button:disabled {
 ========================================================= */
 
 const API_URL =
-    "https://script.google.com/macros/s/AKfycbwc4E-evaEp8_0jhN3SpHA7mNaooojiNO7sth--e7rKJpBdm2f1MH-4KaOZ2vPW0kfx/exec";
+    "https://script.google.com/macros/s/AKfycbw0-slVkBwQInaPHBkSF5aG1OhJaUamge2aySd8zpx_fLbkd_CRNTWka2IBLabUDIkG/exec";
 
 
 let atividades = [];
@@ -2199,6 +2199,16 @@ function escJS(v) {
     return String(v ?? "")
         .replace(/\\/g, "\\\\")
         .replace(/'/g, "\\'");
+}
+
+// Escapa texto antes de inserir conteúdo vindo das planilhas no HTML.
+function esc(v) {
+    return String(v ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 
 
