@@ -33,6 +33,77 @@ let usuario =
 let tecnicosInspetor = [];
 let tecnicosCarregados = false;
 
+const FORMULARIOS_DISPONIVEIS = [
+    {
+        nome: 'Manutenção de clivador',
+        descricao: 'Formulário e planilha de respostas.',
+        links: [
+            { texto: 'Abrir formulário', url: 'https://docs.google.com/forms/d/e/1FAIpQLSfL9QdW6GcA6ggsgs-sD2iT5F0k3DIVHQF1MdtuMx5OUUzXPQ/viewform' },
+            { texto: 'Ver respostas', url: 'https://docs.google.com/spreadsheets/d/16g8QuafUqSnOXV6JAXnKoJEvfUoAcTQbGjJolPN9ggs/edit?usp=drivesdk' }
+        ]
+    },
+    {
+        nome: 'Inspeção patrimonial mensal',
+        descricao: 'Formulário e planilha de respostas.',
+        links: [
+            { texto: 'Abrir formulário', url: 'https://docs.google.com/forms/d/e/1FAIpQLSfSw8COeA-XwbrL7UlnB3ZVMbNRPJGcoXi5T637pP7dEHzW1A/viewform' },
+            { texto: 'Ver respostas', url: 'https://docs.google.com/spreadsheets/d/1k269VmenhPUhmbQFLN00Jb36CLtyzYyQq-1FWoSrDhI/edit?usp=sharing' }
+        ]
+    },
+    {
+        nome: 'Relatório de desempenho técnico',
+        descricao: 'Formulário e planilha de respostas.',
+        links: [
+            { texto: 'Abrir formulário', url: 'https://docs.google.com/forms/d/e/1FAIpQLSc8TSrI5oZwBnn6LDezTz4YBjq9c3rvYnhkH0b1WnBXx5hi3A/viewform' },
+            { texto: 'Ver respostas', url: 'https://docs.google.com/spreadsheets/d/1qOePpUq-98ybcmh5Z4tTt3B73bwK8AR3Pd9vjAdnBC4/edit?usp=drivesdk' }
+        ]
+    },
+    {
+        nome: 'Aferição Power Meter',
+        descricao: 'Planilha de aferição dos Power Meters.',
+        links: [
+            { texto: 'Abrir planilha', url: 'https://docs.google.com/spreadsheets/d/1AhW_xK4O70TfF-EA2BtEsVPTXrprJc3xGw8pobju-ok/edit?usp=drivesdk' }
+        ]
+    }
+];
+
+function abrirAbaForms() {
+    document.querySelectorAll('.view-inspetor').forEach(view => view.classList.add('oculto'));
+    document.querySelectorAll('.aba-inspetor').forEach(botao => botao.classList.remove('ativa'));
+    document.getElementById('formsView').classList.remove('oculto');
+    document.getElementById('abaForms').classList.add('ativa');
+    renderizarFormularios();
+}
+
+function renderizarFormularios() {
+    const lista = document.getElementById('listaForms');
+    if (!lista) return;
+
+    const validos = FORMULARIOS_DISPONIVEIS.map(form => ({
+        ...form,
+        links: (form.links || []).filter(link => {
+            try { return new URL(link.url).protocol === 'https:'; }
+            catch (_) { return false; }
+        })
+    })).filter(form => form.links.length);
+
+    if (!validos.length) {
+        lista.innerHTML = '<div class="forms-vazio">Os formulários disponíveis aparecerão aqui.</div>';
+        return;
+    }
+
+    lista.innerHTML = validos.map(form => `
+        <article class="forms-card">
+            <div class="forms-card-icone">📝</div>
+            <div class="forms-card-conteudo">
+                <h3>${esc(form.nome || 'Formulário')}</h3>
+                ${form.descricao ? `<p>${esc(form.descricao)}</p>` : ''}
+                <div class="forms-acoes">${form.links.map(link => `<a class="forms-abrir" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">${esc(link.texto)} ↗</a>`).join('')}</div>
+            </div>
+        </article>
+    `).join('');
+}
+
 async function abrirAbaInspetor(aba) {
     const agendaView=document.getElementById('agendaView');
     const tecnicosView=document.getElementById('tecnicosView');
@@ -40,12 +111,16 @@ async function abrirAbaInspetor(aba) {
     const abaAgenda=document.getElementById('abaAgenda');
     const abaTecnicos=document.getElementById('abaTecnicos');
     const abaPM=document.getElementById('abaPowerMeter');
+    const abaForms=document.getElementById('abaForms');
+    const formsView=document.getElementById('formsView');
     agendaView.classList.toggle('oculto',aba!=='agenda');
     tecnicosView.classList.toggle('oculto',aba!=='tecnicos');
     pmView.classList.toggle('oculto',aba!=='powerMeter');
+    formsView.classList.add('oculto');
     abaAgenda.classList.toggle('ativa',aba==='agenda');
     abaTecnicos.classList.toggle('ativa',aba==='tecnicos');
     abaPM.classList.toggle('ativa',aba==='powerMeter');
+    abaForms.classList.remove('ativa');
     if(aba==='tecnicos' && !tecnicosCarregados) await carregarTecnicosInspetor();
     if(aba==='powerMeter') await carregarPowerMeters();
 }
