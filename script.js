@@ -1,5 +1,3 @@
-
-
 /* =========================================================
    CONFIGURAÇÃO
 ========================================================= */
@@ -68,6 +66,7 @@ const FORMULARIOS_DISPONIVEIS = [
 ];
 
 function abrirAbaForms() {
+    if (!estaLogado()) return;
     document.querySelectorAll('.view-inspetor').forEach(view => view.classList.add('oculto'));
     document.querySelectorAll('.aba-inspetor').forEach(botao => botao.classList.remove('ativa'));
     document.getElementById('formsView').classList.remove('oculto');
@@ -1369,6 +1368,16 @@ function atualizarInterfaceLogin() {
 
     const admin =
         estaLogado();
+
+    const abaForms = document.getElementById('abaForms');
+    abaForms.disabled = !admin;
+    abaForms.setAttribute('aria-disabled', String(!admin));
+    abaForms.title = admin ? 'Abrir catálogo de Forms' : 'Faça login para acessar os Forms';
+
+    const formsView = document.getElementById('formsView');
+    if (!admin && !formsView.classList.contains('oculto')) {
+        abrirAbaInspetor('agenda');
+    }
 
 
     document
