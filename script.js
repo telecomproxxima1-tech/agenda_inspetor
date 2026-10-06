@@ -57,13 +57,6 @@ const FORMULARIOS_DISPONIVEIS = [
             { texto: 'Abrir formulário', url: 'https://docs.google.com/forms/d/e/1FAIpQLSc8TSrI5oZwBnn6LDezTz4YBjq9c3rvYnhkH0b1WnBXx5hi3A/viewform' },
             { texto: 'Ver respostas', url: 'https://docs.google.com/spreadsheets/d/1qOePpUq-98ybcmh5Z4tTt3B73bwK8AR3Pd9vjAdnBC4/edit?usp=drivesdk' }
         ]
-    },
-    {
-        nome: 'Aferição Power Meter',
-        descricao: 'Planilha de aferição dos Power Meters.',
-        links: [
-            { texto: 'Abrir planilha', url: 'https://docs.google.com/spreadsheets/d/1AhW_xK4O70TfF-EA2BtEsVPTXrprJc3xGw8pobju-ok/edit?usp=drivesdk' }
-        ]
     }
 ];
 
