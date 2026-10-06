@@ -194,6 +194,11 @@ function normalizarAtividade(obj) {
   };
 }
 
+function atividadeConcluida(status) {
+  const valor = String(status || "").trim().toLowerCase();
+  return valor === "concluído" || valor === "concluido";
+}
+
 
 function listarAtividades() {
 
@@ -1302,6 +1307,10 @@ function doPost(e) {
           )
         ) {
 
+          if (atividadeConcluida(valores[i][6])) {
+            return erro("Serviços concluídos não podem ser editados.");
+          }
+
           aba
             .getRange(
               i + 1,
@@ -1361,6 +1370,10 @@ function doPost(e) {
           ) ===
           id
         ) {
+
+          if (atividadeConcluida(valores[i][6])) {
+            return erro("Serviços concluídos não podem ser excluídos.");
+          }
 
           aba.deleteRow(
             i + 1
