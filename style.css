@@ -83,6 +83,48 @@ h1 {
     gap: 12px;
 }
 
+.campo-atividades {
+    grid-column: 1 / -1;
+}
+
+.lista-atividades-opcoes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 8px;
+    background: #fafcfd;
+}
+
+.opcao-atividade {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 7px 9px;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.opcao-atividade input {
+    width: auto;
+    margin: 0;
+    accent-color: #1565c0;
+}
+
+.opcao-atividade span {
+    font-size: 13px;
+    font-weight: normal;
+}
+
+.resumo-atividades-selecionadas {
+    margin-top: 7px;
+    color: #607d8b;
+    font-size: 12px;
+}
+
 label {
     font-size: 13px;
     font-weight: bold;
