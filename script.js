@@ -1457,11 +1457,10 @@ function limparFormulario() {
         );
 
 
-    document
-        .getElementById(
-            "atividade"
-        )
-        .value = "";
+    document.querySelectorAll(".atividade-opcao").forEach(function(opcao) {
+        opcao.checked = false;
+    });
+    atualizarResumoAtividades();
 
     document
         .getElementById("descricaoServico")
@@ -1497,6 +1496,33 @@ function limparFormulario() {
         .value =
         "Planejado";
 
+}
+
+function obterAtividadesSelecionadas() {
+    return Array.from(document.querySelectorAll(".atividade-opcao:checked"))
+        .map(function(opcao) { return opcao.value; });
+}
+
+function atualizarResumoAtividades() {
+    const selecionadas = obterAtividadesSelecionadas();
+    const resumo = document.getElementById("resumoAtividadesSelecionadas");
+    if (!resumo) return;
+
+    resumo.textContent = selecionadas.length
+        ? selecionadas.length + " selecionada(s): " + selecionadas.join(" • ")
+        : "Nenhuma atividade selecionada";
+}
+
+function definirAtividadesSelecionadas(valor) {
+    const selecionadas = String(valor || "")
+        .split(/\s*•\s*/)
+        .map(function(item) { return item.trim(); })
+        .filter(Boolean);
+
+    document.querySelectorAll(".atividade-opcao").forEach(function(opcao) {
+        opcao.checked = selecionadas.includes(opcao.value);
+    });
+    atualizarResumoAtividades();
 }
 
 
@@ -1552,13 +1578,7 @@ async function salvarAtividade() {
             .value;
 
 
-    const atividade =
-        document
-            .getElementById(
-                "atividade"
-            )
-            .value
-            .trim();
+    const atividade = obterAtividadesSelecionadas().join(" • ");
 
 
     const tecnico =
@@ -1807,12 +1827,7 @@ function editarAtividade(id) {
         x.data;
 
 
-    document
-        .getElementById(
-            "atividade"
-        )
-        .value =
-        x.atividade;
+    definirAtividadesSelecionadas(x.atividade);
 
     document
         .getElementById("descricaoServico")
@@ -1870,11 +1885,8 @@ function editarAtividade(id) {
         "inline-block";
 
 
-    document
-        .getElementById(
-            "atividade"
-        )
-        .focus();
+    (document.querySelector(".atividade-opcao:checked") ||
+        document.querySelector(".atividade-opcao")).focus();
 
 
     renderizar();
