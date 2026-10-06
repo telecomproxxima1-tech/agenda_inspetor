@@ -11,6 +11,23 @@ body {
     color: #263238;
 }
 
+.capa-pagina {
+    width: 100%;
+    background: #eaf4fb;
+    text-align: center;
+    overflow: hidden;
+}
+
+.capa-pagina img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 78vh;
+    object-fit: contain;
+    object-position: center;
+    margin: 0 auto;
+}
+
 .container {
     max-width: 1200px;
     margin: auto;
