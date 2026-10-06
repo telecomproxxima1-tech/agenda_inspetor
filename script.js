@@ -1759,6 +1759,11 @@ async function salvarAtividade() {
    EDITAR ATIVIDADE
 ========================================================= */
 
+function atividadeConcluida(item) {
+    const status = String(item && item.status || "").trim().toLowerCase();
+    return status === "concluído" || status === "concluido";
+}
+
 function editarAtividade(id) {
 
     if (!estaLogado()) {
@@ -1783,6 +1788,11 @@ function editarAtividade(id) {
 
     if (!x)
         return;
+
+    if (atividadeConcluida(x)) {
+        alert("Serviços concluídos não podem ser editados.");
+        return;
+    }
 
 
     idEditando =
@@ -1884,6 +1894,12 @@ async function excluirAtividade(id) {
 
         return;
 
+    }
+
+    const atividadeAlvo = atividades.find(a => String(a.id) === String(id));
+    if (atividadeConcluida(atividadeAlvo)) {
+        alert("Serviços concluídos não podem ser excluídos.");
+        return;
     }
 
 
@@ -2218,7 +2234,7 @@ function renderizar() {
 
 
                     let botoes =
-                        estaLogado()
+                        estaLogado() && !atividadeConcluida(x)
 
                             ? `
 
