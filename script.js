@@ -57,6 +57,13 @@ const FORMULARIOS_DISPONIVEIS = [
             { texto: 'Abrir formulário', url: 'https://docs.google.com/forms/d/e/1FAIpQLSc8TSrI5oZwBnn6LDezTz4YBjq9c3rvYnhkH0b1WnBXx5hi3A/viewform' },
             { texto: 'Ver respostas', url: 'https://docs.google.com/spreadsheets/d/1qOePpUq-98ybcmh5Z4tTt3B73bwK8AR3Pd9vjAdnBC4/edit?usp=drivesdk' }
         ]
+    },
+    {
+        nome: 'Aferição Power Meter',
+        descricao: 'Planilha de aferição dos Power Meters.',
+        links: [
+            { texto: 'Abrir planilha', url: 'https://docs.google.com/spreadsheets/d/1AhW_xK4O70TfF-EA2BtEsVPTXrprJc3xGw8pobju-ok/edit?usp=drivesdk' }
+        ]
     }
 ];
 
@@ -1456,6 +1463,10 @@ function limparFormulario() {
         )
         .value = "";
 
+    document
+        .getElementById("descricaoServico")
+        .value = "";
+
 
     document
         .getElementById(
@@ -1654,6 +1665,9 @@ async function salvarAtividade() {
             atividade:
                 atividade,
 
+            descricao:
+                document.getElementById("descricaoServico").value.trim(),
+
             tecnico:
                 tecnico,
 
@@ -1789,6 +1803,11 @@ function editarAtividade(id) {
         )
         .value =
         x.atividade;
+
+    document
+        .getElementById("descricaoServico")
+        .value =
+        x.descricao || "";
 
 
     document
@@ -2101,6 +2120,8 @@ function renderizar() {
                                 (
                                     x.atividade +
                                     " " +
+                                    (x.descricao || "") +
+                                    " " +
                                     x.tecnico +
                                     " " +
                                     (x.local || "")
@@ -2258,6 +2279,12 @@ function renderizar() {
                                 x.status
                             )}
                         </span>
+
+                        ${
+                            x.descricao
+                                ? `<details class="descricao-servico"><summary>Mais detalhes</summary><p>${esc(x.descricao)}</p></details>`
+                                : ""
+                        }
 
                         <br>
 
@@ -2571,6 +2598,7 @@ function exportarCSV() {
             "ID",
             "Data",
             "Atividade",
+            "Descrição do serviço",
             "Técnico",
             "Local",
             "Prioridade",
@@ -2587,6 +2615,8 @@ function exportarCSV() {
                     x.data,
 
                     x.atividade,
+
+                    x.descricao || "",
 
                     x.tecnico,
 
