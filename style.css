@@ -92,12 +92,41 @@ label {
 }
 
 input,
-select {
+select,
+textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid #cfd8dc;
     border-radius: 6px;
     font-size: 14px;
+}
+
+.campo-descricao-servico {
+    grid-column: 1 / -1;
+}
+
+.campo-descricao-servico textarea {
+    min-height: 78px;
+    resize: vertical;
+}
+
+.descricao-servico {
+    margin-top: 10px;
+    color: #455a64;
+    font-size: 13px;
+}
+
+.descricao-servico summary {
+    color: #1565c0;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.descricao-servico p {
+    margin: 7px 0 0;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 button {
