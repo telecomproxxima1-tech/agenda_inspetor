@@ -23,7 +23,8 @@ const CABECALHO = [
   "Técnico",
   "Local",
   "Prioridade",
-  "Status"
+  "Status",
+  "Descrição do serviço"
 ];
 
 /*
@@ -158,6 +159,23 @@ function obterAba() {
     );
   }
 
+  if (aba.getMaxColumns() < CABECALHO.length) {
+    aba.insertColumnsAfter(
+      aba.getMaxColumns(),
+      CABECALHO.length - aba.getMaxColumns()
+    );
+  }
+
+  const colunaDescricao = CABECALHO.length;
+  const cabecalhoDescricao = String(
+    aba.getRange(1, colunaDescricao).getValue() || ""
+  ).trim();
+  if (!cabecalhoDescricao) {
+    aba.getRange(1, colunaDescricao).setValue(CABECALHO[colunaDescricao - 1]);
+  } else if (cabecalhoDescricao !== CABECALHO[colunaDescricao - 1]) {
+    throw new Error('A coluna H da aba "Atividades" já possui outro cabeçalho. Confira antes de salvar a descrição.');
+  }
+
   return aba;
 }
 
@@ -171,7 +189,8 @@ function normalizarAtividade(obj) {
     tecnico: String(obj.tecnico || "").trim(),
     local: String(obj.local || "").trim(),
     prioridade: String(obj.prioridade || "Média"),
-    status: String(obj.status || "Planejado")
+    status: String(obj.status || "Planejado"),
+    descricao: String(obj.descricao || "").trim()
   };
 }
 
@@ -219,7 +238,10 @@ function listarAtividades() {
         String(linha[5] || "Média"),
 
       status:
-        String(linha[6] || "Planejado")
+        String(linha[6] || "Planejado"),
+
+      descricao:
+        String(linha[7] || "")
 
     }));
 }
@@ -1240,7 +1262,8 @@ function doPost(e) {
         item.tecnico,
         item.local,
         item.prioridade,
-        item.status
+        item.status,
+        item.descricao
 
       ]);
 
@@ -1293,7 +1316,8 @@ function doPost(e) {
               item.tecnico,
               item.local,
               item.prioridade,
-              item.status
+              item.status,
+              item.descricao
             ]]);
 
           return resposta(
