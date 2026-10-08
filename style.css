@@ -251,6 +251,26 @@ button:disabled {
     max-width: 220px;
 }
 
+.filtros .filtro-data {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.filtros .filtro-data input {
+    width: auto;
+    min-width: 145px;
+    padding: 8px;
+}
+
+.resultado-agenda {
+    color: #607d8b;
+    font-size: 12px;
+}
+
 .pesquisa {
     max-width: 420px;
 }
@@ -326,6 +346,53 @@ button:disabled {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 10px;
+}
+
+.agenda-scroll {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.agenda.agenda-mensal {
+    grid-template-columns: repeat(7, minmax(130px, 1fr));
+    min-width: 980px;
+    gap: 6px;
+}
+
+.agenda-mensal .dia {
+    min-height: 145px;
+}
+
+.agenda-mensal .cabecalho-dia {
+    padding: 7px 4px;
+    font-size: 11px;
+}
+
+.dia-fora-mes {
+    opacity: .48;
+}
+
+.alternar-visualizacao {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin: 0 auto 12px;
+}
+
+.alternar-visualizacao button {
+    padding: 8px 16px;
+    color: #1565c0;
+    background: #eef5fb;
+    border: 1px solid #bbd5e9;
+}
+
+.alternar-visualizacao button.visualizacao-ativa {
+    color: #fff;
+    background: #1565c0;
+}
+
+.card-atrasadas .numero {
+    color: #c62828;
 }
 
 .dia {
@@ -532,6 +599,15 @@ button:disabled {
 
     .navegacao {
         flex-direction: column;
+    }
+
+    .filtros .filtro-data {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .filtros .filtro-data input {
+        flex: 1;
     }
 
 }
