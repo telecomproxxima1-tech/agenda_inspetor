@@ -13,6 +13,8 @@ let atividades = [];
 let dataReferencia =
     new Date();
 
+let modoAgenda = "semana";
+
 let idEditando = null;
 
 let sincronizando = false;
@@ -1073,6 +1075,7 @@ async function sincronizar() {
         bancoLocal();
 
         atualizarFiltroTecnicos();
+        atualizarFiltroAtividades();
 
         renderizar();
 
@@ -1094,6 +1097,7 @@ async function sincronizar() {
         carregarCacheLocal();
 
         atualizarFiltroTecnicos();
+        atualizarFiltroAtividades();
 
         renderizar();
 
@@ -2011,353 +2015,127 @@ async function excluirAtividade(id) {
 ========================================================= */
 
 function renderizar() {
-
-    const inicio =
-        inicioSemana(
-            dataReferencia
-        );
-
-
-    const dias = [
-
-        [
-            "Segunda",
-            "dataSegunda"
-        ],
-
-        [
-            "Terça",
-            "dataTerca"
-        ],
-
-        [
-            "Quarta",
-            "dataQuarta"
-        ],
-
-        [
-            "Quinta",
-            "dataQuinta"
-        ],
-
-        [
-            "Sexta",
-            "dataSexta"
-        ],
-
-        [
-            "Sábado",
-            "dataSabado"
-        ],
-
-        [
-            "Domingo",
-            "dataDomingo"
-        ]
-
-    ];
-
-
-    const ft =
-        document
-            .getElementById(
-                "filtroTecnico"
-            )
-            .value;
-
-
-    const fs =
-        document
-            .getElementById(
-                "filtroStatus"
-            )
-            .value;
-
-
-    const pesquisa =
-        document
-            .getElementById(
-                "pesquisa"
-            )
-            .value
-            .toLowerCase()
-            .trim();
-
-
-    dias.forEach(
-        function(d, i) {
-
-            let data =
-                new Date(
-                    inicio
-                );
-
-
-            data.setDate(
-                inicio.getDate() +
-                i
-            );
-
-
-            document
-                .getElementById(
-                    d[0]
-                )
-                .innerHTML =
-                "";
-
-
-            document
-                .getElementById(
-                    d[1]
-                )
-                .innerText =
-                formatarData(
-                    data
-                );
-
-
-            let lista =
-                atividades.filter(
-                    function(x) {
-
-                        return (
-
-                            x.data ===
-                            dataISO(data)
-
-                            &&
-
-                            (
-                                !ft ||
-                                x.tecnico === ft
-                            )
-
-                            &&
-
-                            (
-                                !fs ||
-                                x.status === fs
-                            )
-
-                            &&
-
-                            (
-                                !pesquisa ||
-
-                                (
-                                    x.atividade +
-                                    " " +
-                                    (x.descricao || "") +
-                                    " " +
-                                    x.tecnico +
-                                    " " +
-                                    (x.local || "")
-                                )
-                                .toLowerCase()
-                                .includes(
-                                    pesquisa
-                                )
-                            )
-
-                        );
-
-                    }
-                );
-
-
-            const area =
-                document.getElementById(
-                    d[0]
-                );
-
-
-            if (!lista.length) {
-
-                area.innerHTML =
-                    '<div class="vazio">' +
-                    'Nenhuma atividade' +
-                    '</div>';
-
-                return;
-
-            }
-
-
-            lista.forEach(
-                function(x) {
-
-                    let div =
-                        document.createElement(
-                            "div"
-                        );
-
-
-                    div.className =
-                        "atividade";
-
-
-                    if (
-                        String(x.id) ===
-                        String(idEditando)
-                    ) {
-
-                        div.classList.add(
-                            "editando"
-                        );
-
-                    }
-
-
-                    let st = {
-
-                        "Planejado":
-                            "planejado",
-
-                        "Em andamento":
-                            "andamento",
-
-                        "Concluído":
-                            "concluido",
-
-                        "Pendente":
-                            "pendente"
-
-                    }[
-                        x.status
-                    ] || "";
-
-
-                    let pc = {
-
-                        "Alta":
-                            "alta",
-
-                        "Média":
-                            "media",
-
-                        "Baixa":
-                            "baixa"
-
-                    }[
-                        x.prioridade ||
-                        "Média"
-                    ];
-
-
-                    let botoes =
-                        estaLogado() && !atividadeConcluida(x)
-
-                            ? `
-
-                                <button
-                                    class="btn-editar"
-                                    onclick="editarAtividade('${String(x.id).replace(/'/g, "\\'")}')">
-
-                                    Editar
-
-                                </button>
-
-                                <button
-                                    class="btn-excluir"
-                                    onclick="excluirAtividade('${String(x.id).replace(/'/g, "\\'")}')">
-
-                                    Excluir
-
-                                </button>
-
-                            `
-
-                            : "";
-
-
-                    div.innerHTML =
-
-                        `<strong>
-                            ${esc(x.atividade)}
-                        </strong>
-
-                        <div class="tecnico">
-                            👷 Técnico:
-                            ${esc(x.tecnico)}
-                        </div>
-
-                        ${
-                            x.local
-                                ? `
-                                    <div class="local">
-                                        📍 ${esc(x.local)}
-                                    </div>
-                                  `
-                                : ""
-                        }
-
-                        <div class="prioridade ${pc}">
-                            ● Prioridade:
-                            ${esc(
-                                x.prioridade ||
-                                "Média"
-                            )}
-                        </div>
-
-                        <br>
-
-                        <span class="status ${st}">
-                            ${esc(
-                                x.status
-                            )}
-                        </span>
-
-                        ${
-                            x.descricao
-                                ? `<details class="descricao-servico"><summary>Mais detalhes</summary><p>${esc(x.descricao)}</p></details>`
-                                : ""
-                        }
-
-                        <br>
-
-                        ${botoes}`;
-
-
-                    area.appendChild(
-                        div
-                    );
-
-                }
-            );
-
+    const container = document.getElementById("agenda");
+    if (!container) return;
+
+    const referencia = new Date(dataReferencia);
+    referencia.setHours(0, 0, 0, 0);
+
+    let inicio;
+    let quantidadeDias;
+    let dataTitulo;
+
+    if (modoAgenda === "mes") {
+        inicio = new Date(referencia.getFullYear(), referencia.getMonth(), 1);
+        const deslocamento = (inicio.getDay() + 6) % 7;
+        inicio.setDate(inicio.getDate() - deslocamento);
+        quantidadeDias = 42;
+        dataTitulo = new Date(referencia.getFullYear(), referencia.getMonth(), 1)
+            .toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+    } else {
+        inicio = inicioSemana(referencia);
+        quantidadeDias = 7;
+    }
+
+    const filtroTecnico = document.getElementById("filtroTecnico").value;
+    const filtroStatus = document.getElementById("filtroStatus").value;
+    const filtroAtividade = document.getElementById("filtroAtividade").value;
+    const dataMinima = document.getElementById("filtroDataInicio").value;
+    const dataMaxima = document.getElementById("filtroDataFim").value;
+    const pesquisa = document.getElementById("pesquisa").value.toLowerCase().trim();
+
+    const atividadesFiltradas = atividades.filter(function(item) {
+        const atividadesItem = String(item.atividade || "").split(/\s*•\s*/);
+        const texto = [item.atividade, item.descricao, item.tecnico, item.local]
+            .filter(Boolean).join(" ").toLocaleLowerCase("pt-BR");
+
+        return (!filtroTecnico || item.tecnico === filtroTecnico) &&
+            (!filtroStatus || item.status === filtroStatus) &&
+            (!filtroAtividade || atividadesItem.includes(filtroAtividade)) &&
+            (!dataMinima || item.data >= dataMinima) &&
+            (!dataMaxima || item.data <= dataMaxima) &&
+            (!pesquisa || texto.includes(pesquisa));
+    });
+
+    const nomesDias = ["SEGUNDA", "TERÇA", "QUARTA", "QUINTA", "SEXTA", "SÁBADO", "DOMINGO"];
+    container.classList.toggle("agenda-mensal", modoAgenda === "mes");
+    container.innerHTML = "";
+    let totalExibido = 0;
+
+    for (let i = 0; i < quantidadeDias; i++) {
+        const data = new Date(inicio);
+        data.setDate(inicio.getDate() + i);
+        const iso = dataISO(data);
+        const dia = document.createElement("section");
+        dia.className = "dia";
+        if (modoAgenda === "mes" && data.getMonth() !== referencia.getMonth()) {
+            dia.classList.add("dia-fora-mes");
         }
-    );
 
+        const cabecalho = document.createElement("div");
+        cabecalho.className = "cabecalho-dia";
+        cabecalho.innerHTML = modoAgenda === "mes"
+            ? `${nomesDias[i % 7]}<div class="data-dia">${data.getDate()}</div>`
+            : `${nomesDias[i]}<div class="data-dia">${formatarData(data)}</div>`;
+        dia.appendChild(cabecalho);
 
-    /* MOSTRA QUAL SEMANA ESTÁ SENDO VISUALIZADA */
+        const area = document.createElement("div");
+        const lista = atividadesFiltradas.filter(function(item) { return item.data === iso; });
+        totalExibido += lista.length;
 
-    let fim =
-        new Date(
-            inicio
-        );
+        if (!lista.length) {
+            if (modoAgenda === "semana") {
+                area.innerHTML = '<div class="vazio">Nenhuma atividade</div>';
+            }
+        } else {
+            lista.forEach(function(item) {
+                const cartao = document.createElement("article");
+                cartao.className = "atividade";
+                if (String(item.id) === String(idEditando)) cartao.classList.add("editando");
 
+                const classeStatus = {
+                    "Planejado": "planejado", "Em andamento": "andamento",
+                    "Concluído": "concluido", "Pendente": "pendente"
+                }[item.status] || "";
+                const classePrioridade = { "Alta": "alta", "Média": "media", "Baixa": "baixa" }[item.prioridade || "Média"] || "media";
+                const idSeguro = String(item.id).replace(/'/g, "\\'");
+                const botoes = estaLogado() && !atividadeConcluida(item)
+                    ? `<button class="btn-editar" onclick="editarAtividade('${idSeguro}')">Editar</button><button class="btn-excluir" onclick="excluirAtividade('${idSeguro}')">Excluir</button>`
+                    : "";
 
-    fim.setDate(
-        inicio.getDate() +
-        6
-    );
+                cartao.innerHTML = `<strong>${esc(item.atividade)}</strong>
+                    <div class="tecnico">👷 Técnico: ${esc(item.tecnico)}</div>
+                    ${item.local ? `<div class="local">📍 ${esc(item.local)}</div>` : ""}
+                    <div class="prioridade ${classePrioridade}">● Prioridade: ${esc(item.prioridade || "Média")}</div>
+                    <span class="status ${classeStatus}">${esc(item.status)}</span>
+                    ${item.descricao ? `<details class="descricao-servico"><summary>Mais detalhes</summary><p>${esc(item.descricao)}</p></details>` : ""}
+                    ${botoes}`;
+                area.appendChild(cartao);
+            });
+        }
 
+        dia.appendChild(area);
+        container.appendChild(dia);
+    }
 
-    document
-        .getElementById(
-            "semanaInfo"
-        )
-        .innerText =
+    const fim = new Date(inicio);
+    fim.setDate(inicio.getDate() + quantidadeDias - 1);
+    document.getElementById("semanaInfo").innerText = modoAgenda === "mes"
+        ? `Mês: ${dataTitulo}`
+        : `Semana: ${formatarData(inicio)} até ${formatarData(fim)}`;
 
-        "Semana: " +
-        formatarData(inicio) +
-        " até " +
-        formatarData(fim);
-
-    
+    document.getElementById("btnPeriodoAnterior").innerText = modoAgenda === "mes" ? "◀ Mês anterior" : "◀ Semana anterior";
+    document.getElementById("btnPeriodoProximo").innerText = modoAgenda === "mes" ? "Próximo mês ▶" : "Próxima semana ▶";
+    document.querySelector(".btn-hoje").innerText = modoAgenda === "mes" ? "📅 Mês atual" : "📅 Semana atual";
+    document.getElementById("btnVisaoSemana").classList.toggle("visualizacao-ativa", modoAgenda === "semana");
+    document.getElementById("btnVisaoMes").classList.toggle("visualizacao-ativa", modoAgenda === "mes");
+    document.getElementById("resultadoFiltrosAgenda").textContent = `${totalExibido} tarefa(s) no período exibido`;
     atualizarResumo();
+}
 
+function definirModoAgenda(modo) {
+    modoAgenda = modo === "mes" ? "mes" : "semana";
+    renderizar();
 }
 
 
@@ -2437,6 +2215,11 @@ function atualizarResumo() {
 
             }
         ).length;
+
+    const hoje = dataISO(new Date());
+    document.getElementById("atrasadas").innerText = atividades.filter(function(x) {
+        return x.data && x.data < hoje && !atividadeConcluida(x);
+    }).length;
 
 }
 
@@ -2523,17 +2306,35 @@ function atualizarFiltroTecnicos() {
 
 }
 
+function atualizarFiltroAtividades() {
+    const select = document.getElementById("filtroAtividade");
+    if (!select) return;
+    const atual = select.value;
+    const opcoes = [...new Set(atividades.flatMap(function(item) {
+        return String(item.atividade || "").split(/\s*•\s*/).filter(Boolean);
+    }))].sort(function(a, b) { return a.localeCompare(b, "pt-BR"); });
+
+    select.innerHTML = '<option value="">Todas as atividades</option>';
+    opcoes.forEach(function(nome) {
+        const option = document.createElement("option");
+        option.value = nome;
+        option.textContent = nome;
+        select.appendChild(option);
+    });
+    select.value = opcoes.includes(atual) ? atual : "";
+}
+
 
 /* =========================================================
    NAVEGAÇÃO ENTRE SEMANAS
 ========================================================= */
 
 function semanaAnterior() {
-
-    dataReferencia.setDate(
-        dataReferencia.getDate() -
-        7
-    );
+    if (modoAgenda === "mes") {
+        dataReferencia = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth() - 1, 1);
+    } else {
+        dataReferencia.setDate(dataReferencia.getDate() - 7);
+    }
 
 
     renderizar();
@@ -2542,11 +2343,11 @@ function semanaAnterior() {
 
 
 function proximaSemana() {
-
-    dataReferencia.setDate(
-        dataReferencia.getDate() +
-        7
-    );
+    if (modoAgenda === "mes") {
+        dataReferencia = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth() + 1, 1);
+    } else {
+        dataReferencia.setDate(dataReferencia.getDate() + 7);
+    }
 
 
     renderizar();
@@ -2916,6 +2717,7 @@ document
 carregarCacheLocal();
 
 atualizarFiltroTecnicos();
+atualizarFiltroAtividades();
 
 atualizarInterfaceLogin();
 
