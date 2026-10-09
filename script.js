@@ -61,10 +61,10 @@ const FORMULARIOS_DISPONIVEIS = [
         ]
     },
     {
-        nome: 'Aferição Power Meter',
-        descricao: 'Planilha de aferição dos Power Meters.',
+        nome: 'Solicitar EPI/EPC',
+        descricao: 'Forms para solicitar EPI/EPC.',
         links: [
-            { texto: 'Abrir planilha', url: 'https://docs.google.com/spreadsheets/d/1AhW_xK4O70TfF-EA2BtEsVPTXrprJc3xGw8pobju-ok/edit?usp=drivesdk' }
+            { texto: 'Abrir Form', url: 'https://docs.google.com/forms/d/1v0Y_I20MNY8yo7j4EJiDaiuI2BX43272w_OiL7zs0YY/viewform?edit_requested=true' }
         ]
     }
 ];
